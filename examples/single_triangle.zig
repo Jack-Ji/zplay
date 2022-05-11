@@ -46,7 +46,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         0.5,  -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
         0.0,  0.5,  0.0, 0.0, 0.0, 1.0, 1.0,
     };
-    vertex_array = VertexArray.init(std.testing.allocator, 5);
+    vertex_array = VertexArray.init(ctx.default_allocator, 5);
     vertex_array.use();
     defer vertex_array.disuse();
     vertex_array.vbos[0].allocInitData(f32, &vertices, .static_draw);
@@ -56,7 +56,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // create material
     material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &.{
                 0,   0,   0,
                 0,   255, 0,
@@ -72,7 +72,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // compose renderer's input
     render_data = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]Renderer.Input.VertexData{.{
             .element_draw = false,
             .vertex_array = vertex_array,

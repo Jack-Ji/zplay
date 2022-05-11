@@ -28,24 +28,24 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // create sprite sheet
     sprite_sheet = try SpriteSheet.fromPicturesInDir(
-        std.testing.allocator,
+        ctx.default_allocator,
         "assets/images",
         size.w,
         size.h,
         .{ .accept_jpg = false },
     );
     characters = try std.ArrayList(Actor).initCapacity(
-        std.testing.allocator,
+        ctx.default_allocator,
         1000000,
     );
     sprite_batch = try SpriteBatch.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &ctx.graphics,
         10,
         1000000,
     );
     all_names = try std.ArrayList([]const u8).initCapacity(
-        std.testing.allocator,
+        ctx.default_allocator,
         10000,
     );
     var it = sprite_sheet.search_tree.iterator();

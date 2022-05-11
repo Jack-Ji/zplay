@@ -26,7 +26,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     const size = ctx.graphics.getDrawableSize();
 
     // create font atlas
-    var font = try Font.init(std.testing.allocator, "assets/msyh.ttf");
+    var font = try Font.init(ctx.default_allocator, "assets/msyh.ttf");
     defer font.deinit();
     font_atlas1 = try font.createAtlas(64, &Font.CodepointRanges.chineseCommon, null);
     font_atlas2 = try font.createAtlas(30, &Font.CodepointRanges.chineseCommon, null);
@@ -35,7 +35,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     font_renderer = FontRenderer.init();
 
     // vertex array
-    var vattrib = std.ArrayList(f32).init(std.testing.allocator);
+    var vattrib = std.ArrayList(f32).init(ctx.default_allocator);
     defer vattrib.deinit();
     _ = try font_atlas1.appendDrawDataFromUTF8String(
         "你好！ABCDEFGHIJKL abcdefghijkl",
@@ -54,7 +54,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         &vattrib,
     );
     const vcount1 = @intCast(u32, vattrib.items.len) / FontRenderer.float_num_of_vertex_attrib;
-    vertex_array1 = VertexArray.init(std.testing.allocator, 1);
+    vertex_array1 = VertexArray.init(ctx.default_allocator, 1);
     FontRenderer.setupVertexArray(vertex_array1);
     vertex_array1.vbos[0].allocInitData(f32, vattrib.items, .static_draw);
 
@@ -84,7 +84,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         &vattrib,
     );
     const vcount2 = @intCast(u32, vattrib.items.len) / FontRenderer.float_num_of_vertex_attrib;
-    vertex_array2 = VertexArray.init(std.testing.allocator, 1);
+    vertex_array2 = VertexArray.init(ctx.default_allocator, 1);
     FontRenderer.setupVertexArray(vertex_array2);
     vertex_array2.vbos[0].allocInitData(f32, vattrib.items, .static_draw);
 
@@ -98,7 +98,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // compose renderer's input
     render_data = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]Renderer.Input.VertexData{
             .{
                 .element_draw = false,

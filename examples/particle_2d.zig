@@ -35,7 +35,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     rd = std.rand.DefaultPrng.init(@intCast(u64, std.time.timestamp()));
     sheet = try SpriteSheet.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]SpriteSheet.ImageSource{
             .{
                 .name = "particle",
@@ -48,12 +48,12 @@ fn init(ctx: *zp.Context) anyerror!void {
         4096,
     );
     sb = try SpriteBatch.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &ctx.graphics,
         1,
         10000,
     );
-    ps = try ParticleSystem.init(std.testing.allocator);
+    ps = try ParticleSystem.init(ctx.default_allocator);
     emitter1.sprite = try sheet.createSprite("particle");
     emitter2.sprite = try sheet.createSprite("particle");
     try ps.addEffect(

@@ -36,14 +36,14 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // load models
     helmet = Model.fromGLTF(
-        std.testing.allocator,
+        ctx.default_allocator,
         "assets/SciFiHelmet/SciFiHelmet.gltf",
         false,
         null,
     ) catch unreachable;
     color_mr = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &[_]u8{ 255, 255, 255 },
             .rgb,
             1,
@@ -67,7 +67,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_wireframe = Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &camera,
         null,
@@ -78,10 +78,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         Mat4.fromScale(Vec3.set(0.7)).rotate(90, Vec3.up()),
         null,
     ) catch unreachable;
-    render_data_raster = try render_data_wireframe.clone(std.testing.allocator);
+    render_data_raster = try render_data_wireframe.clone(ctx.default_allocator);
     render_data_wireframe.vds.?.items[0].material = &color_mr;
     render_pipeline = try RenderPipeline.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .beforeFn = beforeWireframeRendering,

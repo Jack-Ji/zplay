@@ -56,7 +56,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // allocate framebuffer stuff
     shadow_fb = try Framebuffer.initForShadowMapping(
-        std.testing.allocator,
+        ctx.default_allocator,
         shadow_width,
         shadow_height,
     );
@@ -108,17 +108,18 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // init physics world
-    physics_world = try BulletWorld.init(std.testing.allocator, -9.8);
-    try physics_world.enableDebugDraw(std.testing.allocator);
-    all_actors = try std.ArrayList(Actor).initCapacity(std.testing.allocator, 6);
+    physics_world = try BulletWorld.init(ctx.default_allocator, -9.8);
+    try physics_world.enableDebugDraw(ctx.default_allocator);
+    all_actors = try std.ArrayList(Actor).initCapacity(ctx.default_allocator, 6);
     addActor(
+        ctx.default_allocator,
         Vec3.zero(),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/world.gltf",
             false,
             try Texture.init2DFromPixels(
-                std.testing.allocator,
+                ctx.default_allocator,
                 &.{ 128, 128, 128 },
                 .rgb,
                 1,
@@ -130,9 +131,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .friction = 0.15 },
     );
     addActor(
+        ctx.default_allocator,
         Vec3.new(-5, 15, -2),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/capsule.gltf",
             false,
             null,
@@ -145,9 +147,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
+        ctx.default_allocator,
         Vec3.new(-5, 11, -2),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/cylinder.gltf",
             false,
             null,
@@ -164,9 +167,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
+        ctx.default_allocator,
         Vec3.new(-5, 8, -2),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/cube.gltf",
             false,
             null,
@@ -179,9 +183,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
+        ctx.default_allocator,
         Vec3.new(-5, 6, -2),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/cone.gltf",
             false,
             null,
@@ -194,9 +199,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
+        ctx.default_allocator,
         Vec3.new(-5, 3.5, -2),
         try Model.fromGLTF(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/sphere.gltf",
             false,
             null,
@@ -212,7 +218,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // init render data annd pipeline
     color_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &.{ 0, 255, 0 },
             .rgb,
             1,
@@ -221,21 +227,21 @@ fn init(ctx: *zp.Context) anyerror!void {
         ),
     });
     render_data_shadow = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &light_view_camera,
         null,
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &person_view_camera,
         null,
         null,
     );
     render_data_outlined = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &person_view_camera,
         null,
@@ -259,7 +265,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         }
     }
     render_pipeline = try RenderPipeline.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .fb = shadow_fb,
@@ -337,6 +343,7 @@ fn beforeRenderingOutlined(ctx: *Context, custom: ?*anyopaque) void {
 }
 
 fn addActor(
+    allocator: std.mem.Allocator,
     pos: Vec3,
     model: *Model,
     shape: ?bt.Shape,
@@ -345,7 +352,7 @@ fn addActor(
     all_actors.append(.{
         .model = model,
         .physics_id = physics_world.addObjectWithModel(
-            std.testing.allocator,
+            allocator,
             pos,
             model,
             shape,

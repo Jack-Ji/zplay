@@ -55,8 +55,8 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     try dig.init(ctx);
 
-    cube = try Mesh.genCube(std.testing.allocator, 1, 1, 1);
-    cube_wire_va = VertexArray.init(std.testing.allocator, 1);
+    cube = try Mesh.genCube(ctx.default_allocator, 1, 1, 1);
+    cube_wire_va = VertexArray.init(ctx.default_allocator, 1);
     cube_wire_va.use();
     cube_wire_va.vbos[0].allocInitData(
         f32,
@@ -65,14 +65,14 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
     cube_wire_va.setAttribute(0, 0, 3, f32, false, 0, 0);
     cube_wire_va.disuse();
-    plane_va = VertexArray.init(std.testing.allocator, 1);
+    plane_va = VertexArray.init(ctx.default_allocator, 1);
     plane_va.vbos[0].allocData(@sizeOf(@TypeOf(plane_vs)), .dynamic_draw);
     plane_va.use();
     plane_va.setAttribute(0, 0, 3, f32, false, 0, 0);
     plane_va.disuse();
     cube_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &[_]u8{ 200, 200, 200, 128 },
             .rgba,
             1,
@@ -82,7 +82,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     wire_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &[_]u8{ 0, 0, 0 },
             .rgb,
             1,
@@ -92,7 +92,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     plane_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            std.testing.allocator,
+            ctx.default_allocator,
             &[_]u8{ 200, 0, 0, 100 },
             .rgba,
             1,
@@ -115,7 +115,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         Vec3.forward(),
     );
     render_data_cube = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &camera,
         null,
@@ -137,7 +137,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .material = &wire_material,
     });
     render_data_section = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &camera,
         null,
@@ -156,7 +156,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .pos_range1_max = Vec3.set(1),
     });
     pipeline = try RenderPipeline.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .beforeFn = beforeRenderingCube,

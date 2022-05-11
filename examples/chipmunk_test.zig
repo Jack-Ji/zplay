@@ -11,7 +11,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     const size = ctx.graphics.getDrawableSize();
 
-    world = try CPWorld.init(std.testing.allocator, .{
+    world = try CPWorld.init(ctx.default_allocator, .{
         .gravity = .{ .x = 0, .y = 600 },
     });
 

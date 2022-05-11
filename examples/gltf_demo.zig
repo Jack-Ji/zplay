@@ -58,7 +58,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
 
-    skybox = SkyboxRenderer.init(std.testing.allocator);
+    skybox = SkyboxRenderer.init(ctx.default_allocator);
     simple_renderer = SimpleRenderer.init(.{});
 
     pipline = try RenderPipeline.init(ctx.default_allocator, &[_]RenderPipeline.RenderPass{
@@ -156,7 +156,7 @@ fn loop(ctx: *zp.Context) void {
 
         const S = struct {
             const MAX_SIZE = 20000;
-            var data = std.ArrayList(f32).init(std.testing.allocator);
+            var data = std.ArrayList(f32).init(ctx.default_allocator);
             var offset: u32 = 0;
             var history: f32 = 10;
             var interval: f32 = 0;
@@ -219,7 +219,7 @@ fn loadScene(ctx: *zp.Context) !void {
     // allocate skybox
     skybox_material = Material.init(.{
         .single_cubemap = Texture.initCubeFromFilePaths(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/skybox/right.jpg",
             "assets/skybox/left.jpg",
             "assets/skybox/top.jpg",
@@ -233,9 +233,9 @@ fn loadScene(ctx: *zp.Context) !void {
     // load models
     total_vertices = 0;
     total_meshes = 0;
-    dog = Model.fromGLTF(std.testing.allocator, "assets/dog.gltf", merge_meshes, null) catch unreachable;
-    girl = Model.fromGLTF(std.testing.allocator, "assets/girl.glb", merge_meshes, null) catch unreachable;
-    helmet = Model.fromGLTF(std.testing.allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null) catch unreachable;
+    dog = Model.fromGLTF(ctx.default_allocator, "assets/dog.gltf", merge_meshes, null) catch unreachable;
+    girl = Model.fromGLTF(ctx.default_allocator, "assets/girl.glb", merge_meshes, null) catch unreachable;
+    helmet = Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null) catch unreachable;
     for (dog.meshes.items) |m| {
         total_vertices += @intCast(u32, m.positions.items.len);
         total_meshes += 1;

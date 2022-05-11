@@ -29,14 +29,14 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // create sprite sheet
     sprite_sheet = try SpriteSheet.fromPicturesInDir(
-        std.testing.allocator,
+        ctx.default_allocator,
         "assets/images",
         size.w,
         size.h,
         .{},
     );
     //sprite_sheet = try SpriteSheet.fromSheetFiles(
-    //    std.testing.allocator,
+    //    ctx.default_allocator,
     //    "sheet",
     //);
     custom_effect = SpriteRenderer.init(gfx.gpu.ShaderProgram.shader_head ++
@@ -56,19 +56,19 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
     sprite = try sprite_sheet.createSprite("ogre");
     sprite_batch = try SpriteBatch.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &ctx.graphics,
         10,
         1000,
     );
     camera = try Camera.fromViewport(
-        std.testing.allocator,
+        ctx.default_allocator,
         ctx.graphics.viewport,
     );
     sprite_batch.render_data.camera = camera.getCamera();
 
     // create renderer
-    tex_display = try TextureDisplay.init(std.testing.allocator);
+    tex_display = try TextureDisplay.init(ctx.default_allocator);
 }
 
 fn loop(ctx: *zp.Context) void {

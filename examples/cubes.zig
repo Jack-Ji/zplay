@@ -59,12 +59,12 @@ fn init(ctx: *zp.Context) anyerror!void {
     try dig.init(ctx);
 
     // allocate skybox
-    skybox = SkyboxRenderer.init(std.testing.allocator);
+    skybox = SkyboxRenderer.init(ctx.default_allocator);
 
     // allocate framebuffer stuff
     const size = ctx.graphics.getDrawableSize();
     fb = try Framebuffer.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         size.w,
         size.h,
         .{},
@@ -72,12 +72,12 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // simple renderer
     scene_renderer = SimpleRenderer.init(.{});
-    screen_renderer = try TextureDisplay.init(std.testing.allocator);
+    screen_renderer = try TextureDisplay.init(ctx.default_allocator);
 
     // init materials
     skybox_material = Material.init(.{
         .single_cubemap = try Texture.initCubeFromFilePaths(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/skybox/right.jpg",
             "assets/skybox/left.jpg",
             "assets/skybox/top.jpg",
@@ -92,15 +92,15 @@ fn init(ctx: *zp.Context) anyerror!void {
     // init model
     var material = Material.init(.{
         .single_texture = try Texture.init2DFromFilePath(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/wall.jpg",
             false,
             .{},
         ),
     });
     cube = try Model.init(
-        std.testing.allocator,
-        try Mesh.genCube(std.testing.allocator, 1, 1, 1),
+        ctx.default_allocator,
+        try Mesh.genCube(ctx.default_allocator, 1, 1, 1),
         Mat4.identity(),
         material,
         &.{material.data.single_texture},
@@ -229,22 +229,22 @@ fn loop(ctx: *zp.Context) void {
                         .escape => ctx.kill(),
                         .f2 => {
                             fb.tex.?.saveToFile(
-                                std.testing.allocator,
+                                ctx.default_allocator,
                                 "test.png",
                                 .{},
                             ) catch unreachable;
                             fb.tex.?.saveToFile(
-                                std.testing.allocator,
+                                ctx.default_allocator,
                                 "test.bmp",
                                 .{ .format = .bmp },
                             ) catch unreachable;
                             fb.tex.?.saveToFile(
-                                std.testing.allocator,
+                                ctx.default_allocator,
                                 "test.tga",
                                 .{ .format = .tga },
                             ) catch unreachable;
                             fb.tex.?.saveToFile(
-                                std.testing.allocator,
+                                ctx.default_allocator,
                                 "test.jpg",
                                 .{ .format = .jpg },
                             ) catch unreachable;

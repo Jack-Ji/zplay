@@ -38,7 +38,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // allocate materials
     cubemap = try Texture.initCubeFromFilePaths(
-        std.testing.allocator,
+        ctx.default_allocator,
         "assets/skybox/right.jpg",
         "assets/skybox/left.jpg",
         "assets/skybox/top.jpg",
@@ -82,13 +82,13 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // alloc renderers
-    skybox = SkyboxRenderer.init(std.testing.allocator);
+    skybox = SkyboxRenderer.init(ctx.default_allocator);
     reflect_renderer = EnvMappingRenderer.init(.reflect);
     refract_renderer = EnvMappingRenderer.init(.refract);
     current_scene_renderer = reflect_renderer.renderer();
 
     // load model
-    model = try Model.fromGLTF(std.testing.allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", false, null);
+    model = try Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", false, null);
 
     // compose renderer's input
     camera = Camera.fromPositionAndTarget(
@@ -105,7 +105,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{},
         &camera,
         &skybox_material,

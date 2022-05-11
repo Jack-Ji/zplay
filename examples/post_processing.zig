@@ -54,13 +54,13 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // create framebuffer
     const size = ctx.graphics.getDrawableSize();
-    fb = try Framebuffer.init(std.testing.allocator, size.w, size.h, .{});
+    fb = try Framebuffer.init(ctx.default_allocator, size.w, size.h, .{});
 
     // create renderer
     simple_renderer = SimpleRenderer.init(.{});
 
     // create mesh
-    box = try Mesh.genCube(std.testing.allocator, 2, 2, 2);
+    box = try Mesh.genCube(ctx.default_allocator, 2, 2, 2);
 
     // create material
     fb_material = Material.init(.{
@@ -68,7 +68,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     box_material = Material.init(.{
         .single_texture = try Texture.init2DFromFilePath(
-            std.testing.allocator,
+            ctx.default_allocator,
             "assets/container2.png",
             false,
             .{},
@@ -76,11 +76,11 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // create post-processing renderers
-    pp_texture_display = try post_processing.TextureDisplay.init(std.testing.allocator);
-    pp_gamma_correction = try post_processing.GammaCorrection.init(std.testing.allocator);
-    pp_grayscale = try post_processing.Grayscale.init(std.testing.allocator);
-    pp_inversion = try post_processing.Inversion.init(std.testing.allocator);
-    pp_convolution = try post_processing.Convolution.init(std.testing.allocator);
+    pp_texture_display = try post_processing.TextureDisplay.init(ctx.default_allocator);
+    pp_gamma_correction = try post_processing.GammaCorrection.init(ctx.default_allocator);
+    pp_grayscale = try post_processing.Grayscale.init(ctx.default_allocator);
+    pp_inversion = try post_processing.Inversion.init(ctx.default_allocator);
+    pp_convolution = try post_processing.Convolution.init(ctx.default_allocator);
     pp_rd = switch (pp_selection) {
         .texture_display => pp_texture_display.renderer(),
         .gamma_correction => pp_gamma_correction.renderer(),
@@ -105,7 +105,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
     var vertex_data = box.getVertexData(null, null);
     render_data = try Renderer.Input.init(
-        std.testing.allocator,
+        ctx.default_allocator,
         &.{vertex_data},
         &camera,
         &box_material,

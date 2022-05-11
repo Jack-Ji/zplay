@@ -201,8 +201,12 @@ pub const Context = struct {
 
 /// application configurations
 pub const Game = struct {
-    /// default memory allocator
-    allocator: std.mem.Allocator = std.heap.c_allocator,
+    /// custom memory allocator
+    allocator: ?std.mem.Allocator = null,
+
+    /// default memory allocator settings
+    enable_mem_leak_checks: bool = false,
+    enable_mem_detail_logs: bool = false,
 
     /// called once before rendering loop starts
     initFn: fn (ctx: *Context) anyerror!void,
@@ -278,7 +282,7 @@ pub const Game = struct {
 };
 
 /// entrance point, never return until application is killed
-pub fn run(g: Game) !void {
+pub fn run(comptime g: Game) !void {
     try sdl.init(sdl.InitFlags.everything);
     defer sdl.quit();
 
@@ -304,7 +308,6 @@ pub fn run(g: Game) !void {
         flags.opengl = true;
     }
     var ctx: Context = .{
-        .default_allocator = g.allocator,
         .window = try sdl.createWindow(
             g.title,
             g.pos_x,
@@ -314,7 +317,25 @@ pub fn run(g: Game) !void {
             flags,
         ),
     };
-    defer ctx.window.destroy();
+    const AllocatorType = std.heap.GeneralPurposeAllocator(.{
+        .safety = if (g.enable_mem_leak_checks) true else false,
+        .verbose_log = if (g.enable_mem_detail_logs) true else false,
+    });
+    var gpa: ?AllocatorType = null;
+    if (g.allocator) |a| {
+        ctx.default_allocator = a;
+    } else {
+        gpa = AllocatorType{};
+        ctx.default_allocator = gpa.?.allocator();
+    }
+    defer {
+        if (gpa) |*a| {
+            if (a.deinit()) {
+                @panic("memory leaks happened!");
+            }
+        }
+        ctx.window.destroy();
+    }
 
     // windows size thresholds
     if (g.min_size) |size| {
