@@ -417,7 +417,7 @@ const PhysicsDebug = struct {
                 \\} FRAG;
                 \\
                 \\void main() {
-                \\    gl_Position = u_vp_matrix * vec4(a_pos + a_radius * a_uv, 0, 1);
+                \\    gl_Position = u_vp_matrix * vec4(a_pos + a_radius * a_uv, 0.0, 1.0);
                 \\    FRAG.uv = a_uv;
                 \\    FRAG.fill = a_fill;
                 \\    FRAG.outline = a_outline;
@@ -435,8 +435,8 @@ const PhysicsDebug = struct {
                 \\void main() {
                 \\    float len = length(FRAG.uv);
                 \\    float fw = length(fwidth(FRAG.uv));
-                \\    float mask = smoothstep(-1, fw - 1, -len);
-                \\    float outline = 1 - fw;
+                \\    float mask = smoothstep(-1.0, fw - 1.0, -len);
+                \\    float outline = 1.0 - fw;
                 \\    float outline_mask = smoothstep(outline - fw, outline, len);
                 \\    vec4 color = FRAG.fill + (FRAG.outline - FRAG.fill * FRAG.outline.a) * outline_mask;
                 \\    frag_color = color*mask;
