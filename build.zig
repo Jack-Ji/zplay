@@ -22,7 +22,7 @@ pub fn build(b: *std.build.Builder) void {
         .{ .name = "simple_window", .opt = .{ .graphics_api = graphics_api } },
         .{ .name = "font", .opt = .{ .graphics_api = graphics_api } },
         .{ .name = "single_triangle", .opt = .{ .graphics_api = graphics_api } },
-        .{ .name = "cubes", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
+        .{ .name = "cubes", .opt = .{ .graphics_api = .gl33, .link_imgui = true } },
         .{ .name = "phong_lighting", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
         .{ .name = "imgui_demo", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
         .{ .name = "imgui_fontawesome", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
