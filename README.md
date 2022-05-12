@@ -45,6 +45,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.install();
 
     zplay.link(exe, .{
+      // choose graphics api (gl33/gles3)
       // link optional modules (imgui/nanovg etc)
     });
 
