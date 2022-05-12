@@ -213,6 +213,8 @@ pub const NVG_TEXTURE_RGBA: c_int = 2;
 pub const enum_NVGtexture = c_uint;
 pub extern fn nvgCreateGL3(flags: c_int) ?*NVGcontext;
 pub extern fn nvgDeleteGL3(ctx: ?*NVGcontext) void;
+pub extern fn nvgCreateGLES3(flags: c_int) ?*NVGcontext;
+pub extern fn nvgDeleteGLES3(ctx: ?*NVGcontext) void;
 pub const NVG_ANTIALIAS = 1 << 0;
 pub const NVG_STENCIL_STROKES = 1 << 1;
 pub const NVG_DEBUG = 1 << 2;

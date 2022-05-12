@@ -203,7 +203,6 @@ fn init(ctx: *zp.Context) anyerror!void {
                 false,
                 .{
                     .need_linearization = true,
-                    .gen_mipmap = true,
                 },
             ),
             .specular_map = try Texture.init2DFromPixels(

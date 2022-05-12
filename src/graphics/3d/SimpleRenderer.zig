@@ -21,9 +21,9 @@ const vs_body =
     \\layout (location = 4) in vec2 a_tex1;
     \\layout (location = 10) in mat4 a_transform;
     \\
-    \\uniform mat4 u_model = mat4(1.0);
-    \\uniform mat4 u_view = mat4(1.0);
-    \\uniform mat4 u_project = mat4(1.0);
+    \\uniform mat4 u_model;
+    \\uniform mat4 u_view;
+    \\uniform mat4 u_project;
     \\
     \\out vec3 v_pos;
     \\out vec2 v_tex;

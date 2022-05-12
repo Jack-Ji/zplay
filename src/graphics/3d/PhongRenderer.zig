@@ -29,10 +29,10 @@ const vs_body = light.ShaderDefinitions ++
     \\out vec4 v_frag_in_light_space;
     \\#endif
     \\
-    \\uniform mat4 u_model = mat4(1.0);
-    \\uniform mat4 u_normal = mat4(1.0);
-    \\uniform mat4 u_view = mat4(1.0);
-    \\uniform mat4 u_project = mat4(1.0);
+    \\uniform mat4 u_model;
+    \\uniform mat4 u_normal;
+    \\uniform mat4 u_view;
+    \\uniform mat4 u_project;
     \\
     \\void main()
     \\{
@@ -103,10 +103,11 @@ const fs_body = light.ShaderDefinitions ++
     \\    vec3 proj_coords = v_frag_in_light_space.xyz / v_frag_in_light_space.w;
     \\    proj_coords = proj_coords * 0.5 + 0.5;
     \\    float current_depth = proj_coords.z;
-    \\    float shadow = 0;
+    \\    float shadow = 0.0;
     \\    if (current_depth <= 1.0) {
     \\        float bias = max(0.05 * (1.0 - dot(light_dir, vertex_normal)), 0.005);
-    \\        vec2 texture_size = 1.0 / textureSize(u_shadow_map, 0);
+    \\        ivec2 size = textureSize(u_shadow_map, 0);
+    \\        vec2 texture_size = vec2(1.0, 1.0) / vec2(float(size.x), float(size.y));
     \\
     \\        // PCF - percentage-closer filtering
     \\        for (int x = -1; x <= 1; ++x) {

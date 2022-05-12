@@ -91,6 +91,7 @@ pub fn init(
                 .rgb, .rgb_f16, .rgb_f32 => .rgb,
                 .rgba, .rgba_f16, .rgba_f32 => .rgba,
             },
+            u8,
             option.multisamples,
         );
         if (i == 0) self.tex = self.texs[0];
@@ -116,8 +117,15 @@ pub fn init(
                     .depth_stencil,
                     width,
                     height,
+                    switch (zp.build_options.graphics_api) {
+                        .gl33 => .depth_stencil,
+                        .gles3 => .depth24_stencil8,
+                    },
                     .depth_stencil,
-                    .depth_stencil,
+                    switch (zp.build_options.graphics_api) {
+                        .gl33 => u8,
+                        .gles3 => u32,
+                    },
                     option.multisamples,
                 ),
             };
@@ -142,8 +150,15 @@ pub fn init(
                         .depth,
                         width,
                         height,
+                        switch (zp.build_options.graphics_api) {
+                            .gl33 => .depth_component,
+                            .gles3 => .depth_component_32f,
+                        },
                         .depth_component,
-                        .depth_component,
+                        switch (zp.build_options.graphics_api) {
+                            .gl33 => u8,
+                            .gles3 => f32,
+                        },
                         option.multisamples,
                     ),
                 };
@@ -243,6 +258,7 @@ fn allocAndAttachTexture(
     height: u32,
     texture_format: Texture.TextureFormat,
     pixel_format: Texture.PixelFormat,
+    comptime T: type,
     multisamples: ?u32,
 ) !*Texture {
     var tex = try Texture.init(
@@ -270,7 +286,7 @@ fn allocAndAttachTexture(
             height,
             null,
             pixel_format,
-            u8,
+            T,
             null,
             false,
         );

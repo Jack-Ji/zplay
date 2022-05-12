@@ -77,14 +77,24 @@ pub const ImageFlags = packed struct {
 var ctx: ?*c.NVGcontext = undefined;
 
 pub fn init(flags: ?c_int) !void {
-    ctx = c.nvgCreateGL3(flags orelse c.NVG_ANTIALIAS | c.NVG_STENCIL_STROKES);
+    switch (zp.build_options.graphics_api) {
+        .gl33 => {
+            ctx = c.nvgCreateGL3(flags orelse c.NVG_ANTIALIAS | c.NVG_STENCIL_STROKES);
+        },
+        .gles3 => {
+            ctx = c.nvgCreateGLES3(flags orelse c.NVG_ANTIALIAS | c.NVG_STENCIL_STROKES);
+        },
+    }
     if (ctx == null) {
         return error.InitContextFailed;
     }
 }
 
 pub fn deinit() void {
-    c.nvgDeleteGL3(ctx);
+    switch (zp.build_options.graphics_api) {
+        .gl33 => c.nvgDeleteGL3(ctx),
+        .gles3 => c.nvgDeleteGLES3(ctx),
+    }
 }
 
 // Begin drawing a new frame

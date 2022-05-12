@@ -2,7 +2,7 @@
 A simple framework intended for game/tool creation.
 
 ## Features
-* Little external dependency, only SDL2 and OpenGL3
+* Little external dependency, only SDL2 and OpenGL3/GLES3
 * Support PC platforms: windows/linux (possibly macOS, don't know for sure)
 * Flexible render-passes pipeline, greatly simplify rendering code
 * Graphics oriented math library: Vec2/Vec3/Mat4/Quaternion ([zalgebra](https://github.com/kooparse/zalgebra))

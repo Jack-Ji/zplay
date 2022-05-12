@@ -11,10 +11,17 @@ const Self = @This();
 const allocator = std.heap.raw_c_allocator;
 
 /// common shader head
-pub const shader_head =
+pub const shader_head = switch (zp.build_options.graphics_api) {
+    .gl33 =>
     \\#version 330 core
     \\
-;
+    ,
+    .gles3 =>
+    \\#version 300 es
+    \\precision highp float;
+    \\precision highp int;
+    \\
+};
 
 /// id of shader program
 id: gl.GLuint = undefined,

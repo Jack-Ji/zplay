@@ -6,12 +6,6 @@ const sdl = zp.deps.sdl;
 const gl = zp.deps.gl;
 const Self = @This();
 
-pub const Api = enum {
-    opengl,
-    vulkan,
-    metal,
-};
-
 pub const Capability = enum(c_uint) {
     blend = gl.GL_BLEND,
     color_logic_op = gl.GL_COLOR_LOGIC_OP,
@@ -140,18 +134,39 @@ culling_option: CullingOption = undefined,
 
 /// prepare graphics api
 pub fn prepare(g: zp.Game) !void {
-    assert(g.graphics_api == .opengl); // only opengl for now
     if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_FLAGS, 0) != 0) {
         return sdl.makeError();
     }
-    if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_PROFILE_MASK, sdl.c.SDL_GL_CONTEXT_PROFILE_CORE) != 0) {
-        return sdl.makeError();
-    }
-    if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MAJOR_VERSION, 3) != 0) {
-        return sdl.makeError();
-    }
-    if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MINOR_VERSION, 3) != 0) {
-        return sdl.makeError();
+
+    switch (zp.build_options.graphics_api) {
+        .gl33 => {
+            if (sdl.c.SDL_GL_SetAttribute(
+                sdl.c.SDL_GL_CONTEXT_PROFILE_MASK,
+                sdl.c.SDL_GL_CONTEXT_PROFILE_CORE,
+            ) != 0) {
+                return sdl.makeError();
+            }
+            if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MAJOR_VERSION, 3) != 0) {
+                return sdl.makeError();
+            }
+            if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MINOR_VERSION, 3) != 0) {
+                return sdl.makeError();
+            }
+        },
+        .gles3 => {
+            if (sdl.c.SDL_GL_SetAttribute(
+                sdl.c.SDL_GL_CONTEXT_PROFILE_MASK,
+                sdl.c.SDL_GL_CONTEXT_PROFILE_ES,
+            ) != 0) {
+                return sdl.makeError();
+            }
+            if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MAJOR_VERSION, 3) != 0) {
+                return sdl.makeError();
+            }
+            if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_MINOR_VERSION, 0) != 0) {
+                return sdl.makeError();
+            }
+        },
     }
     if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_DOUBLEBUFFER, 1) != 0) {
         return sdl.makeError();
@@ -180,7 +195,6 @@ pub fn prepare(g: zp.Game) !void {
 
 /// allocate graphics context
 pub fn init(window: sdl.Window, g: zp.Game) !Self {
-    assert(g.graphics_api == .opengl); // only opengl for now
     const size = window.getSize();
     const gl_ctx = try sdl.gl.createContext(window);
     try sdl.gl.makeCurrent(gl_ctx, window);
@@ -278,8 +292,10 @@ pub fn clear(
         clear_flags |= gl.GL_STENCIL_BUFFER_BIT;
     }
     if (color) |rgba| {
-        gl.clearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
-        self.color = rgba;
+        if (!std.meta.eql(self.color, rgba)) {
+            gl.clearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
+            self.color = rgba;
+        }
     }
     gl.clear(clear_flags);
     gl.util.checkError();
@@ -337,7 +353,7 @@ pub fn setLineWidth(self: *Self, w: f32) void {
 
 /// set polygon mode
 pub fn setPolygonMode(self: *Self, mode: PolygonMode) void {
-    _ = self;
+    if (zp.build_options.graphics_api != .gl33) return;
     gl.polygonMode(gl.GL_FRONT_AND_BACK, @enumToInt(mode));
     self.polygon_mode = mode;
     gl.util.checkError();

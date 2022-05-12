@@ -252,9 +252,6 @@ pub const Game = struct {
     /// relative mouse mode switch
     enable_relative_mouse_mode: bool = false,
 
-    /// graphics api
-    graphics_api: GraphicsContext.Api = .opengl,
-
     /// depth-testing capability
     enable_depth_test: bool = false,
 
@@ -291,6 +288,7 @@ pub fn run(comptime g: Game) !void {
 
     // create window
     var flags = sdl.WindowFlags{
+        .opengl = true,
         .allow_high_dpi = true,
         .mouse_capture = true,
         .mouse_focus = true,
@@ -303,9 +301,6 @@ pub fn run(comptime g: Game) !void {
     }
     if (g.enable_maximized) {
         flags.maximized = true;
-    }
-    if (g.graphics_api == .opengl) {
-        flags.opengl = true;
     }
     var ctx: Context = .{
         .window = try sdl.createWindow(

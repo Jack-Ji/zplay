@@ -156,7 +156,7 @@ fn loop(ctx: *zp.Context) void {
 
         const S = struct {
             const MAX_SIZE = 20000;
-            var data = std.ArrayList(f32).init(ctx.default_allocator);
+            var data = std.ArrayList(f32).init(std.testing.allocator);
             var offset: u32 = 0;
             var history: f32 = 10;
             var interval: f32 = 0;

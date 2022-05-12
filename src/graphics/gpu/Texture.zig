@@ -75,9 +75,13 @@ pub const TextureFormat = enum(c_uint) {
     rgba_f16 = gl.GL_RGBA16F,
     rgba_f32 = gl.GL_RGBA32F,
     srgb = gl.GL_SRGB,
+    srgb8 = gl.GL_SRGB8,
     srgba = gl.GL_SRGB_ALPHA,
+    srgba8_alpha8 = gl.GL_SRGB8_ALPHA8,
     depth_component = gl.GL_DEPTH_COMPONENT,
+    depth_component_32f = gl.GL_DEPTH_COMPONENT32F,
     depth_stencil = gl.GL_DEPTH_STENCIL,
+    depth24_stencil8 = gl.GL_DEPTH24_STENCIL8,
     compressed_red = gl.GL_COMPRESSED_RED,
     compressed_rg = gl.GL_COMPRESSED_RG,
     compressed_rgb = gl.GL_COMPRESSED_RGB,
@@ -92,9 +96,13 @@ pub const TextureFormat = enum(c_uint) {
             .rgb, .rgb_f16, .rgb_f32 => 3,
             .rgba, .rgba_f16, .rgba_f32 => 4,
             .srgb => 3,
+            .srgb8 => 3,
             .srgba => 4,
+            .srgba8_alpha8 => 4,
             .depth_component => 1,
+            .depth_component_32f => 1,
             .depth_stencil => 1,
+            .depth24_stencil8 => 1,
             .compressed_red => 1,
             .compressed_rg => 2,
             .compressed_rgb => 3,
@@ -292,11 +300,17 @@ pub fn init2DFromPixels(
     }
     const tex_format = switch (format) {
         .rgb => if (option.need_linearization)
-            TextureFormat.srgb
+            switch (zp.build_options.graphics_api) {
+                .gl33 => TextureFormat.srgb,
+                .gles3 => TextureFormat.srgb8,
+            }
         else
             TextureFormat.rgb,
         .rgba => if (option.need_linearization)
-            TextureFormat.srgba
+            switch (zp.build_options.graphics_api) {
+                .gl33 => TextureFormat.srgba,
+                .gles3 => TextureFormat.srgba8_alpha8,
+            }
         else
             TextureFormat.rgba,
         else => unreachable,

@@ -22,10 +22,10 @@ const vs_body =
     \\out vec3 v_pos;
     \\out vec3 v_normal;
     \\
-    \\uniform mat4 u_model = mat4(1.0);
-    \\uniform mat4 u_normal = mat4(1.0);
-    \\uniform mat4 u_view = mat4(1.0);
-    \\uniform mat4 u_project = mat4(1.0);
+    \\uniform mat4 u_model;
+    \\uniform mat4 u_normal;
+    \\uniform mat4 u_view;
+    \\uniform mat4 u_project;
     \\
     \\void main()
     \\{

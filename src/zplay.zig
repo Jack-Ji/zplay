@@ -1,4 +1,7 @@
-// export core definitions
+/// global build options (see build.zig)
+pub const build_options = @import("zplay_build_options");
+
+/// export core definitions
 pub usingnamespace @import("core.zig");
 
 /// system events
