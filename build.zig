@@ -26,7 +26,7 @@ pub fn build(b: *std.build.Builder) void {
         .{ .name = "phong_lighting", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
         .{ .name = "imgui_demo", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
         .{ .name = "imgui_fontawesome", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
-        .{ .name = "imgui_ttf", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
+        .{ .name = "imgui_ttf", .opt = .{ .graphics_api = .gl33, .link_imgui = true } },
         .{ .name = "vector_graphics", .opt = .{ .graphics_api = graphics_api, .link_imgui = true, .link_vg = true } },
         .{ .name = "vg_benchmark", .opt = .{ .graphics_api = graphics_api, .link_imgui = true, .link_vg = true } },
         .{ .name = "mesh_generation", .opt = .{ .graphics_api = graphics_api, .link_imgui = true } },
