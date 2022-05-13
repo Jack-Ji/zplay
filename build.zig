@@ -56,7 +56,6 @@ pub fn build(b: *std.build.Builder) void {
         const run_cmd = exe.run();
         run_cmd.step.dependOn(&install_cmd.step);
         run_cmd.step.dependOn(&example_assets_install.step);
-        run_cmd.cwd = "zig-out" ++ std.fs.path.sep_str ++ "bin";
         run_cmd.cwd = std.fs.path.join(b.allocator, &[_][]const u8{ "zig-out", "bin" }) catch unreachable;
         const run_step = b.step(
             demo.name,
