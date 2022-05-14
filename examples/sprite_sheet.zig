@@ -71,14 +71,14 @@ fn init(ctx: *zp.Context) anyerror!void {
     tex_display = try TextureDisplay.init(ctx.default_allocator);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .keyboard_event => |key| {
                 if (key.trigger_type == .up) {
                     switch (key.scan_code) {
                         .escape => ctx.kill(),
-                        .f2 => sprite_sheet.saveToFiles("sheet") catch unreachable,
+                        .f2 => try sprite_sheet.saveToFiles("sheet"),
                         .left => camera.move(-10, 0, .{}),
                         .right => camera.move(10, 0, .{}),
                         .up => camera.move(0, -10, .{}),
@@ -95,23 +95,23 @@ fn loop(ctx: *zp.Context) void {
     }
 
     ctx.graphics.clear(true, true, false, [_]f32{ 0.3, 0.3, 0.3, 1.0 });
-    tex_display.draw(&ctx.graphics, .{
+    try tex_display.draw(&ctx.graphics, .{
         .material = &Material.init(
             .{
                 .single_texture = sprite_sheet.tex,
             },
         ),
         .custom = &Mat4.fromScale(Vec3.new(0.5, 0.5, 1)).translate(Vec3.new(0.5, 0.5, 0)),
-    }) catch unreachable;
+    });
 
     sprite_batch.begin(.{ .depth_sort = .back_to_forth });
-    sprite_batch.drawSprite(sprite, .{
+    try sprite_batch.drawSprite(sprite, .{
         .pos = .{ .x = 400, .y = 300 },
         .scale_w = 2,
         .scale_h = 2,
         .rotate_degree = @floatCast(f32, ctx.tick) * 30,
-    }) catch unreachable;
-    sprite_batch.drawSprite(sprite, .{
+    });
+    try sprite_batch.drawSprite(sprite, .{
         .pos = .{ .x = 400, .y = 300 },
         .anchor_point = .{ .x = 0.5, .y = 0.5 },
         .rotate_degree = @floatCast(f32, ctx.tick) * 30,
@@ -119,17 +119,17 @@ fn loop(ctx: *zp.Context) void {
         .scale_h = 4 + 2 * @sin(@floatCast(f32, ctx.tick)),
         .color = [_]f32{ 1, 0, 0, 1 },
         .depth = 0.6,
-    }) catch unreachable;
-    sprite_batch.end() catch unreachable;
+    });
+    try sprite_batch.end();
 
     sprite_batch.begin(.{ .depth_sort = .back_to_forth, .custom_renderer = custom_effect });
-    sprite_batch.drawSprite(sprite, .{
+    try sprite_batch.drawSprite(sprite, .{
         .pos = .{ .x = 500, .y = 400 },
         .scale_w = 2,
         .scale_h = 2,
         .rotate_degree = @floatCast(f32, ctx.tick) * 30,
-    }) catch unreachable;
-    sprite_batch.drawSprite(sprite, .{
+    });
+    try sprite_batch.drawSprite(sprite, .{
         .pos = .{ .x = 500, .y = 400 },
         .anchor_point = .{ .x = 0.5, .y = 0.5 },
         .rotate_degree = @floatCast(f32, ctx.tick) * 30,
@@ -137,8 +137,8 @@ fn loop(ctx: *zp.Context) void {
         .scale_h = 4 + 2 * @sin(@floatCast(f32, ctx.tick)),
         .color = [_]f32{ 1, 0, 0, 1 },
         .depth = 0.6,
-    }) catch unreachable;
-    sprite_batch.end() catch unreachable;
+    });
+    try sprite_batch.end();
 
     // draw fps
     var draw_opt = console.DrawOption{

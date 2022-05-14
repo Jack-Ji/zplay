@@ -5,6 +5,7 @@ const console = zp.graphics.font.console;
 const event = zp.event;
 const audio = zp.audio;
 const sdl = zp.deps.sdl;
+const log = std.log.scoped(.zplay);
 
 var perf_counter_freq: f64 = undefined;
 
@@ -50,7 +51,7 @@ pub const Context = struct {
     text_buf: [512]u8 = undefined,
 
     /// update frame stats
-    pub fn updateStats(self: *Context) void {
+    pub fn updateStats(self: *Context) bool {
         const counter = sdl.c.SDL_GetPerformanceCounter();
         self.delta_tick = @floatCast(
             f32,
@@ -67,14 +68,11 @@ pub const Context = struct {
             self.average_cpu_time = (1.0 / self.fps) * 1000.0;
             self.fps_refresh_time = self.tick;
             self.frame_counter = 0;
+            return true;
         }
         self.frame_counter += 1;
         self.frame_number += 1;
-    }
-
-    /// set title
-    pub fn setTitle(self: *Context, title: [:0]const u8) void {
-        sdl.c.SDL_SetWindowTitle(self.window.ptr, title.ptr);
+        return false;
     }
 
     /// kill app
@@ -212,7 +210,7 @@ pub const Game = struct {
     initFn: fn (ctx: *Context) anyerror!void,
 
     /// called every frame
-    loopFn: fn (ctx: *Context) void,
+    loopFn: fn (ctx: *Context) anyerror!void,
 
     /// called before life ends
     quitFn: fn (ctx: *Context) void,
@@ -276,6 +274,9 @@ pub const Game = struct {
     /// enable console module
     enable_console: bool = false,
     console_font_size: u32 = 16,
+
+    /// display framestat on title
+    enable_framestat_display: bool = true,
 };
 
 /// entrance point, never return until application is killed
@@ -315,6 +316,7 @@ pub fn run(comptime g: Game) !void {
     const AllocatorType = std.heap.GeneralPurposeAllocator(.{
         .safety = if (g.enable_mem_leak_checks) true else false,
         .verbose_log = if (g.enable_mem_detail_logs) true else false,
+        .enable_memory_limit = true,
     });
     var gpa: ?AllocatorType = null;
     if (g.allocator) |a| {
@@ -376,7 +378,21 @@ pub fn run(comptime g: Game) !void {
     // game loop
     while (!ctx.quit) {
         // update frame stats
-        ctx.updateStats();
+        if (ctx.updateStats() and g.enable_framestat_display) {
+            var buf: [64]u8 = undefined;
+            _ = std.fmt.bufPrintZ(
+                &buf,
+                "{s} | FPS:{d:.1} AVG-CPU:{d:.1}ms VSYNC:{s} MEM:{d} bytes",
+                .{
+                    g.title,
+                    ctx.fps,
+                    ctx.average_cpu_time,
+                    if (g.enable_vsync) "ON" else "OFF",
+                    if (gpa) |a| a.total_requested_bytes else 0,
+                },
+            ) catch unreachable;
+            sdl.c.SDL_SetWindowTitle(ctx.window.ptr, &buf);
+        }
 
         // clear console text
         if (g.enable_console) {
@@ -384,7 +400,13 @@ pub fn run(comptime g: Game) !void {
         }
 
         // main loop
-        g.loopFn(&ctx);
+        g.loopFn(&ctx) catch |e| {
+            log.err("got error in loop: {}", .{e});
+            if (@errorReturnTrace()) |trace| {
+                std.debug.dumpStackTrace(trace.*);
+                break;
+            }
+        };
 
         // render console text
         if (g.enable_console) {

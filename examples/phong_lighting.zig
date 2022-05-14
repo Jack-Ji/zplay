@@ -376,7 +376,7 @@ fn beforeScreenRendering(ctx: *GraphicsContext, custom: ?*anyopaque) void {
     ctx.clear(true, false, false, null);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     // camera movement
     const distance = ctx.delta_tick * person_view_camera.move_speed;
     if (ctx.isKeyPressed(.w)) {
@@ -422,9 +422,9 @@ fn loop(ctx: *zp.Context) void {
 
     // render the scene
     if (enable_gamma_correction) {
-        render_pipeline_gc.run(&ctx.graphics) catch unreachable;
+        try render_pipeline_gc.run(&ctx.graphics);
     } else {
-        render_pipeline.run(&ctx.graphics) catch unreachable;
+        try render_pipeline.run(&ctx.graphics);
     }
 
     dig.beginFrame();

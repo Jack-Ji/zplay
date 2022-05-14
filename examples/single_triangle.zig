@@ -85,7 +85,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .window_event => |we| {
@@ -114,7 +114,7 @@ fn loop(ctx: *zp.Context) void {
     render_data.vds.?.items[0].transform = .{
         .single = Mat4.fromRotation(@floatCast(f32, ctx.tick), Vec3.up()),
     };
-    simple_renderer.draw(&ctx.graphics, render_data) catch unreachable;
+    try simple_renderer.draw(&ctx.graphics, render_data);
 }
 
 fn quit(ctx: *zp.Context) void {

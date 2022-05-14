@@ -77,7 +77,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     try loadScene(ctx);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     global_tick = @floatCast(f32, ctx.tick);
 
     while (ctx.pollEvent()) |e| {
@@ -114,7 +114,7 @@ fn loop(ctx: *zp.Context) void {
     }
 
     // render the scene
-    pipline.run(&ctx.graphics) catch unreachable;
+    try pipline.run(&ctx.graphics);
 
     // settings
     dig.beginFrame();
@@ -134,10 +134,10 @@ fn loop(ctx: *zp.Context) void {
                 dig.c.ImGuiWindowFlags_AlwaysAutoResize,
         )) {
             var buf: [32]u8 = undefined;
-            dig.text(std.fmt.bufPrintZ(&buf, "FPS: {d:.2}", .{dig.getIO().*.Framerate}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "ms/frame: {d:.2}", .{ctx.delta_tick * 1000}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "Total Vertices: {d}", .{total_vertices}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "Total Meshes: {d}", .{total_meshes}) catch unreachable);
+            dig.text(try std.fmt.bufPrintZ(&buf, "FPS: {d:.2}", .{dig.getIO().*.Framerate}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "ms/frame: {d:.2}", .{ctx.delta_tick * 1000}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "Total Vertices: {d}", .{total_vertices}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "Total Meshes: {d}", .{total_meshes}));
             dig.separator();
             if (dig.checkbox("wireframe", &wireframe_mode)) {
                 ctx.graphics.setPolygonMode(if (wireframe_mode) .line else .fill);
@@ -149,7 +149,7 @@ fn loop(ctx: *zp.Context) void {
                 ctx.graphics.toggleCapability(.cull_face, face_culling);
             }
             if (dig.checkbox("merge meshes", &merge_meshes)) {
-                loadScene(ctx) catch unreachable;
+                try loadScene(ctx);
             }
         }
         dig.end();
@@ -167,7 +167,7 @@ fn loop(ctx: *zp.Context) void {
         if (S.interval > 0.1) {
             var mpf = S.interval / S.count;
             if (S.data.items.len < S.MAX_SIZE) {
-                S.data.appendSlice(&.{ @floatCast(f32, ctx.tick), mpf }) catch unreachable;
+                try S.data.appendSlice(&.{ @floatCast(f32, ctx.tick), mpf });
             } else {
                 S.data.items[S.offset] = @floatCast(f32, ctx.tick);
                 S.data.items[S.offset + 1] = mpf;
@@ -218,7 +218,7 @@ fn loadScene(ctx: *zp.Context) !void {
 
     // allocate skybox
     skybox_material = Material.init(.{
-        .single_cubemap = Texture.initCubeFromFilePaths(
+        .single_cubemap = try Texture.initCubeFromFilePaths(
             ctx.default_allocator,
             "assets/skybox/right.jpg",
             "assets/skybox/left.jpg",
@@ -227,15 +227,15 @@ fn loadScene(ctx: *zp.Context) !void {
             "assets/skybox/front.jpg",
             "assets/skybox/back.jpg",
             false,
-        ) catch unreachable,
+        ),
     });
 
     // load models
     total_vertices = 0;
     total_meshes = 0;
-    dog = Model.fromGLTF(ctx.default_allocator, "assets/dog.gltf", merge_meshes, null) catch unreachable;
-    girl = Model.fromGLTF(ctx.default_allocator, "assets/girl.glb", merge_meshes, null) catch unreachable;
-    helmet = Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null) catch unreachable;
+    dog = try Model.fromGLTF(ctx.default_allocator, "assets/dog.gltf", merge_meshes, null);
+    girl = try Model.fromGLTF(ctx.default_allocator, "assets/girl.glb", merge_meshes, null);
+    helmet = try Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null);
     for (dog.meshes.items) |m| {
         total_vertices += @intCast(u32, m.positions.items.len);
         total_meshes += 1;

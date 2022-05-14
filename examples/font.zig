@@ -119,7 +119,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .keyboard_event => |key| {
@@ -136,7 +136,7 @@ fn loop(ctx: *zp.Context) void {
     }
 
     ctx.graphics.clear(true, true, false, [_]f32{ 0.2, 0.3, 0.3, 1.0 });
-    font_renderer.draw(&ctx.graphics, render_data) catch unreachable;
+    try font_renderer.draw(&ctx.graphics, render_data);
 
     _ = ctx.drawText(
         "FPS: {d:.1}  CPU time: {d:.3} ms",

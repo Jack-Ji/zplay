@@ -17,7 +17,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     sound.start();
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     const S = struct {
         var runtime: f32 = 0;
         var cur_ms: u64 = 0;

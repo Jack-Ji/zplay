@@ -9,7 +9,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     try dig.init(ctx);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
 

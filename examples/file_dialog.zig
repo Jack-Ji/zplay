@@ -22,7 +22,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .keyboard_event => |key| {
@@ -47,9 +47,9 @@ fn loop(ctx: *zp.Context) void {
 
     if (dig.begin("file dialog invoke", null, null)) {
         if (dig.button("default directory", null)) {
-            var path = nfd.openDirectoryDialog(
+            var path = try nfd.openDirectoryDialog(
                 std.mem.sliceTo(@ptrCast([*c]u8, &default_path), 0),
-            ) catch unreachable;
+            );
             if (path) |p| {
                 defer p.deinit();
                 std.mem.set(u8, &default_path, 0);
@@ -61,10 +61,10 @@ fn loop(ctx: *zp.Context) void {
 
         dig.separator();
         if (dig.button("select single file", null)) {
-            single_file = nfd.openFileDialog(
+            single_file = try nfd.openFileDialog(
                 null,
                 std.mem.sliceTo(@ptrCast([*c]u8, &default_path), 0),
-            ) catch unreachable;
+            );
         }
         if (single_file) |path| {
             dig.indent(20);
@@ -74,10 +74,10 @@ fn loop(ctx: *zp.Context) void {
 
         dig.separator();
         if (dig.button("select multiple file", null)) {
-            multiple_file = nfd.openMultipleFileDialog(
+            multiple_file = try nfd.openMultipleFileDialog(
                 null,
                 std.mem.sliceTo(@ptrCast([*c]u8, &default_path), 0),
-            ) catch unreachable;
+            );
         }
         if (multiple_file) |pathset| {
             dig.indent(20);

@@ -361,7 +361,7 @@ fn addActor(
     }) catch unreachable;
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     // person_view_camera movement
     const distance = ctx.delta_tick * person_view_camera.move_speed;
     if (ctx.isKeyPressed(.w)) {
@@ -424,7 +424,7 @@ fn loop(ctx: *zp.Context) void {
     }
 
     // render the scene
-    render_pipeline.run(&ctx.graphics) catch unreachable;
+    try render_pipeline.run(&ctx.graphics);
     physics_world.debugDraw(
         &ctx.graphics,
         &person_view_camera,

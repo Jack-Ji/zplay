@@ -76,7 +76,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     if (ctx.isKeyPressed(.up)) ps.effects.items[0].origin = ps.effects.items[0].origin.add(Vec2.new(0, -10));
     if (ctx.isKeyPressed(.down)) ps.effects.items[0].origin = ps.effects.items[0].origin.add(Vec2.new(0, 10));
     if (ctx.isKeyPressed(.left)) ps.effects.items[0].origin = ps.effects.items[0].origin.add(Vec2.new(-10, 0));
@@ -100,8 +100,8 @@ fn loop(ctx: *zp.Context) void {
     ctx.graphics.clear(true, false, false, null);
     ps.update(ctx.delta_tick);
     sb.begin(.{ .blend = .additive });
-    ps.draw(sb) catch unreachable;
-    sb.end() catch unreachable;
+    try ps.draw(sb);
+    try sb.end();
 
     _ = ctx.drawText("fps: {d:.1}", .{ctx.fps}, .{
         .color = [3]f32{ 1, 1, 1 },

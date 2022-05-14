@@ -189,7 +189,7 @@ fn beforeScreenRendering(ctx: *GraphicsContext, custom: ?*anyopaque) void {
     ctx.clear(true, false, false, [4]f32{ 0.3, 0.2, 0.3, 1.0 });
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     if (rotate_cubes) frame1 += 1;
     if (rotate_scene) frame2 += 1;
 

@@ -35,12 +35,12 @@ fn init(ctx: *zp.Context) anyerror!void {
     renderer = SimpleRenderer.init(.{});
 
     // load models
-    helmet = Model.fromGLTF(
+    helmet = try Model.fromGLTF(
         ctx.default_allocator,
         "assets/SciFiHelmet/SciFiHelmet.gltf",
         false,
         null,
-    ) catch unreachable;
+    );
     color_mr = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
             ctx.default_allocator,
@@ -66,18 +66,18 @@ fn init(ctx: *zp.Context) anyerror!void {
         Vec3.zero(),
         null,
     );
-    render_data_wireframe = Renderer.Input.init(
+    render_data_wireframe = try Renderer.Input.init(
         ctx.default_allocator,
         &.{},
         &camera,
         null,
         null,
-    ) catch unreachable;
-    _ = helmet.appendVertexData(
+    );
+    _ = try helmet.appendVertexData(
         &render_data_wireframe,
         Mat4.fromScale(Vec3.set(0.7)).rotate(90, Vec3.up()),
         null,
-    ) catch unreachable;
+    );
     render_data_raster = try render_data_wireframe.clone(ctx.default_allocator);
     render_data_wireframe.vds.?.items[0].material = &color_mr;
     render_pipeline = try RenderPipeline.init(
@@ -110,7 +110,7 @@ fn beforeRasterRendering(ctx: *Context, custom: ?*anyopaque) void {
     ctx.setPolygonMode(.fill);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     // camera movement
     const distance = ctx.delta_tick * camera.move_speed;
     if (ctx.isKeyPressed(.w)) {
@@ -158,13 +158,12 @@ fn loop(ctx: *zp.Context) void {
     }
 
     // start drawing
-    render_data_raster.vds.?.items[0].count =
-        std.math.mod(
+    render_data_raster.vds.?.items[0].count = try std.math.mod(
         u32,
         @intCast(u32, render_data_raster.vds.?.items[0].count + raster_speed),
         @intCast(u32, helmet.meshes.items[0].indices.items.len),
-    ) catch unreachable;
-    render_pipeline.run(&ctx.graphics) catch unreachable;
+    );
+    try render_pipeline.run(&ctx.graphics);
 
     // settings
     dig.beginFrame();

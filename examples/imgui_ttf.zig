@@ -34,7 +34,7 @@ fn printSection(title: [:0]const u8, text: [:0]const u8) void {
     }
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
 

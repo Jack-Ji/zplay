@@ -176,7 +176,7 @@ fn beforeRenderingCube(ctx: *Context, custom: ?*anyopaque) void {
     ctx.clear(true, false, false, [_]f32{ 0.5, 0.5, 0.5, 1 });
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     const S = struct {
         var mouse_btn_pressed = false;
         var camera_orig_pos: Vec3 = undefined;
@@ -272,7 +272,7 @@ fn loop(ctx: *zp.Context) void {
     );
 
     // render the scene
-    pipeline.run(&ctx.graphics) catch unreachable;
+    try pipeline.run(&ctx.graphics);
 
     // control panel
     dig.beginFrame();

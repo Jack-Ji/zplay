@@ -56,22 +56,22 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // create picture_material
     default_material = Material.init(.{
-        .single_texture = Texture.init2DFromPixels(
+        .single_texture = try Texture.init2DFromPixels(
             ctx.default_allocator,
             &.{ 0, 255, 0 },
             .rgb,
             1,
             1,
             .{},
-        ) catch unreachable,
+        ),
     });
     picture_material = Material.init(.{
-        .single_texture = Texture.init2DFromFilePath(
+        .single_texture = try Texture.init2DFromFilePath(
             ctx.default_allocator,
             "assets/wall.jpg",
             false,
             .{},
-        ) catch unreachable,
+        ),
     });
 
     // compose renderer's input
@@ -114,7 +114,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     ctx.graphics.setPolygonMode(if (wireframe_mode) .line else .fill);
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     const S = struct {
         var frame: f32 = 0;
         var axis = Vec4.new(1, 1, 1, 0);
@@ -149,7 +149,7 @@ fn loop(ctx: *zp.Context) void {
     for (render_data.vds.?.items) |*d, i| {
         d.transform.single = model.translate(positions.items[i]);
     }
-    simple_renderer.draw(&ctx.graphics, render_data) catch unreachable;
+    try simple_renderer.draw(&ctx.graphics, render_data);
 
     // settings
     dig.beginFrame();

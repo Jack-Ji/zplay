@@ -36,7 +36,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     tiger = nsvg.loadFile("assets/23.svg", null, null) orelse unreachable;
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {

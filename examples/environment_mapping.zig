@@ -118,7 +118,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     };
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     const S = struct {
         var frame: f32 = 0;
         var current_mapping: c_int = 0;
@@ -178,8 +178,8 @@ fn loop(ctx: *zp.Context) void {
             .scale(Vec3.set(0.6))
             .mul(Mat4.fromRotation(@floatCast(f32, ctx.tick * 10), Vec3.up())),
     );
-    current_scene_renderer.draw(&ctx.graphics, render_data_scene) catch unreachable;
-    skybox.draw(&ctx.graphics, render_data_skybox) catch unreachable;
+    try current_scene_renderer.draw(&ctx.graphics, render_data_scene);
+    try skybox.draw(&ctx.graphics, render_data_skybox);
 
     // rendering settings
     dig.beginFrame();

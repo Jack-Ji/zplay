@@ -113,7 +113,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .keyboard_event => |key| {
@@ -133,7 +133,7 @@ fn loop(ctx: *zp.Context) void {
     Framebuffer.use(fb);
     {
         ctx.graphics.clear(true, true, false, [_]f32{ 0.2, 0.3, 0.3, 1.0 });
-        simple_renderer.draw(&ctx.graphics, render_data) catch unreachable;
+        try simple_renderer.draw(&ctx.graphics, render_data);
     }
 
     // post processing
@@ -152,7 +152,7 @@ fn loop(ctx: *zp.Context) void {
             },
             else => {},
         }
-        pp_rd.draw(&ctx.graphics, input) catch unreachable;
+        try pp_rd.draw(&ctx.graphics, input);
     }
 
     // control panel

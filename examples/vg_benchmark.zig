@@ -27,7 +27,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     tiger = nsvg.loadFile("assets/23.svg", null, null) orelse unreachable;
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
@@ -68,14 +68,14 @@ fn loop(ctx: *zp.Context) void {
                 dig.c.ImGuiWindowFlags_AlwaysAutoResize,
         )) {
             var buf: [32]u8 = undefined;
-            dig.text(std.fmt.bufPrintZ(&buf, "FPS: {d:.02}", .{dig.getIO().*.Framerate}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "ms/frame: {d:.02}", .{ctx.delta_tick * 1000}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "drawcall count: {d}", .{nvg.getDrawCallCount()}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "tigers: {d}", .{S.positions.items.len}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "shapes: {d}", .{S.positions.items.len * tiger.nshape}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "strokes: {d}", .{S.positions.items.len * tiger.nstroke}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "fills: {d}", .{S.positions.items.len * tiger.nfill}) catch unreachable);
-            dig.text(std.fmt.bufPrintZ(&buf, "paths: {d}", .{S.positions.items.len * tiger.npath}) catch unreachable);
+            dig.text(try std.fmt.bufPrintZ(&buf, "FPS: {d:.02}", .{dig.getIO().*.Framerate}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "ms/frame: {d:.02}", .{ctx.delta_tick * 1000}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "drawcall count: {d}", .{nvg.getDrawCallCount()}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "tigers: {d}", .{S.positions.items.len}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "shapes: {d}", .{S.positions.items.len * tiger.nshape}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "strokes: {d}", .{S.positions.items.len * tiger.nstroke}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "fills: {d}", .{S.positions.items.len * tiger.nfill}));
+            dig.text(try std.fmt.bufPrintZ(&buf, "paths: {d}", .{S.positions.items.len * tiger.npath}));
             dig.separator();
 
             // add tigers

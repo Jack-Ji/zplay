@@ -2050,7 +2050,7 @@ fn printIcons(column_size: usize) void {
     }
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
 

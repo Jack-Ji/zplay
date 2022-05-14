@@ -6,7 +6,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     std.log.info("game init", .{});
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .keyboard_event => |key| {

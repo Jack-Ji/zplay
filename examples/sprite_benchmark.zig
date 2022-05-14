@@ -55,7 +55,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     rand_gen = std.rand.DefaultPrng.init(@intCast(u64, std.time.timestamp()));
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     delta_tick = (delta_tick + ctx.delta_tick) / 2;
 
     while (ctx.pollEvent()) |e| {
@@ -85,14 +85,14 @@ fn loop(ctx: *zp.Context) void {
                                 const index = rd.uintLessThan(usize, all_names.items.len);
                                 const angle = rd.float(f32) * 2 * std.math.pi;
                                 const name = all_names.items[index];
-                                characters.append(.{
-                                    .sprite = sprite_sheet.createSprite(name) catch unreachable,
+                                try characters.append(.{
+                                    .sprite = try sprite_sheet.createSprite(name),
                                     .pos = pos,
                                     .velocity = .{
                                         .x = 5 * @cos(angle),
                                         .y = 5 * @sin(angle),
                                     },
-                                }) catch unreachable;
+                                });
                             }
                         }
                     },
@@ -118,11 +118,11 @@ fn loop(ctx: *zp.Context) void {
     ctx.graphics.clear(true, true, false, [_]f32{ 0.3, 0.3, 0.3, 1.0 });
     sprite_batch.begin(.{});
     for (characters.items) |c| {
-        sprite_batch.drawSprite(c.sprite, .{
+        try sprite_batch.drawSprite(c.sprite, .{
             .pos = c.pos,
-        }) catch unreachable;
+        });
     }
-    sprite_batch.end() catch unreachable;
+    try sprite_batch.end();
 
     // draw fps
     const rect = ctx.drawText("fps: {d:.1}", .{ctx.fps}, .{
