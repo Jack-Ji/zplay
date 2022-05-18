@@ -70,7 +70,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // your init code
 }
 
-fn loop(ctx: *zp.Context) void {
+fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
             .quit_event => ctx.kill(),
