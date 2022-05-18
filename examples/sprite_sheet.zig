@@ -33,6 +33,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         "assets/images",
         size.w,
         size.h,
+        1,
         .{},
     );
     //sprite_sheet = try SpriteSheet.fromSheetFiles(

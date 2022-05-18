@@ -44,8 +44,9 @@ fn init(ctx: *zp.Context) anyerror!void {
                 },
             },
         },
-        4096,
-        4096,
+        100,
+        100,
+        1,
     );
     sb = try SpriteBatch.init(
         ctx.default_allocator,

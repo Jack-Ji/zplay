@@ -32,6 +32,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         "assets/images",
         size.w,
         size.h,
+        1,
         .{ .accept_jpg = false },
     );
     characters = try std.ArrayList(Actor).initCapacity(
