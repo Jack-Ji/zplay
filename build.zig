@@ -111,7 +111,7 @@ pub fn link(exe: *std.build.LibExeObjStep, opt: BuildOptions) void {
     const sdl = @import("./src/deps/sdl/Sdk.zig").init(exe.builder);
     exe.addPackage(.{
         .name = "zplay",
-        .path = .{ .path = root_path ++ "/src/zplay.zig" },
+        .source = .{ .path = root_path ++ "/src/zplay.zig" },
         .dependencies = &[_]std.build.Pkg{
             sdl.getWrapperPackage("sdl"),
             build_options.getPackage("zplay_build_options"),

@@ -4,3 +4,6 @@
 [submodule "src/deps/alg"]
 	path = src/deps/alg
 	url = https://github.com/kooparse/zalgebra.git
+[submodule "src/deps/sdl"]
+	path = src/deps/sdl
+	url = https://github.com/Jack-Ji/SDL.zig
