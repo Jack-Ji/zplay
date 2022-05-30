@@ -45,7 +45,6 @@ pub const Context = struct {
     average_cpu_time: f32 = 0,
     fps_refresh_time: f64 = 0,
     frame_counter: u32 = 0,
-    frame_number: u64 = 0,
 
     /// text buffer for rendering console font
     text_buf: [512]u8 = undefined,
@@ -59,6 +58,7 @@ pub const Context = struct {
         );
         self.last_perf_counter = counter;
         self.tick += self.delta_tick;
+        self.frame_counter += 1;
         if ((self.tick - self.fps_refresh_time) >= 1.0) {
             const t = self.tick - self.fps_refresh_time;
             self.fps = @floatCast(
@@ -70,8 +70,6 @@ pub const Context = struct {
             self.frame_counter = 0;
             return true;
         }
-        self.frame_counter += 1;
-        self.frame_number += 1;
         return false;
     }
 
@@ -370,13 +368,32 @@ pub fn run(comptime g: Game) !void {
     }
 
     // init before loop
-    perf_counter_freq = @intToFloat(f64, sdl.c.SDL_GetPerformanceFrequency());
     try g.initFn(&ctx);
     defer g.quitFn(&ctx);
-    _ = ctx.updateStats();
 
     // game loop
+    perf_counter_freq = @intToFloat(f64, sdl.c.SDL_GetPerformanceFrequency());
+    ctx.last_perf_counter = sdl.c.SDL_GetPerformanceCounter();
     while (!ctx.quit) {
+        // main loop
+        g.loopFn(&ctx) catch |e| {
+            log.err("got error in loop: {}", .{e});
+            if (@errorReturnTrace()) |trace| {
+                std.debug.dumpStackTrace(trace.*);
+                break;
+            }
+        };
+
+        // clear console text
+        if (g.enable_console) {
+            console.clear();
+        }
+
+        // render console text
+        if (g.enable_console) {
+            console.submitAndRender(&ctx.graphics);
+        }
+
         // update frame stats
         if (ctx.updateStats() and g.enable_framestat_display) {
             var buf: [128]u8 = undefined;
@@ -392,25 +409,6 @@ pub fn run(comptime g: Game) !void {
                 },
             ) catch unreachable;
             sdl.c.SDL_SetWindowTitle(ctx.window.ptr, &buf);
-        }
-
-        // clear console text
-        if (g.enable_console) {
-            console.clear();
-        }
-
-        // main loop
-        g.loopFn(&ctx) catch |e| {
-            log.err("got error in loop: {}", .{e});
-            if (@errorReturnTrace()) |trace| {
-                std.debug.dumpStackTrace(trace.*);
-                break;
-            }
-        };
-
-        // render console text
-        if (g.enable_console) {
-            console.submitAndRender(&ctx.graphics);
         }
 
         // swap buffers
