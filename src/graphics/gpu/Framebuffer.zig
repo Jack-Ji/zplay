@@ -355,8 +355,10 @@ fn allocAndAttachRenderBuffer(
 }
 
 pub fn deinit(self: Self) void {
-    for (self.texs) |t| {
-        t.deinit();
+    for (self.texs[0..self.tex_num]) |tex| {
+        if (tex) |t| {
+            t.deinit();
+        }
     }
     if (self.depth_stencil) |vb| {
         switch (vb) {
