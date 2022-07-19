@@ -375,6 +375,11 @@ pub fn run(comptime g: Game) !void {
     perf_counter_freq = @intToFloat(f64, sdl.c.SDL_GetPerformanceFrequency());
     ctx.last_perf_counter = sdl.c.SDL_GetPerformanceCounter();
     while (!ctx.quit) {
+        // clear console text
+        if (g.enable_console) {
+            console.clear();
+        }
+
         // main loop
         g.loopFn(&ctx) catch |e| {
             log.err("got error in loop: {}", .{e});
@@ -383,11 +388,6 @@ pub fn run(comptime g: Game) !void {
                 break;
             }
         };
-
-        // clear console text
-        if (g.enable_console) {
-            console.clear();
-        }
 
         // render console text
         if (g.enable_console) {
