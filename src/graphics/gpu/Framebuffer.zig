@@ -3,6 +3,7 @@ const assert = std.debug.assert;
 const panic = std.debug.panic;
 const Texture = @import("Texture.zig");
 const zp = @import("../../zplay.zig");
+const stb_image = zp.deps.stb.image;
 const gl = zp.deps.gl;
 const Self = @This();
 
@@ -377,9 +378,7 @@ pub fn deinit(self: Self) void {
 }
 
 /// copy pixel data to other framebuffer
-/// WARNING: after blit operation, default framebuffer will be activated!
 pub fn blitData(src: Self, dst: Self) void {
-    defer Self.use(null);
     gl.bindFramebuffer(
         gl.GL_READ_FRAMEBUFFER,
         src.id,
@@ -405,8 +404,98 @@ pub fn blitData(src: Self, dst: Self) void {
     gl.util.checkError();
 }
 
+// save pixel data of current framebuffer to file
+pub const SaveOption = struct {
+    format: enum { png, bmp, tga, jpg } = .png,
+    png_compress_level: u8 = 8,
+    tga_rle_compress: bool = true,
+    jpg_quality: u8 = 75, // between 1 and 100
+    flip_on_write: bool = true, // flip by default
+};
+pub fn savePixels(
+    allocator: std.mem.Allocator,
+    bottom_left_x: u32,
+    bottom_left_y: u32,
+    width: u32,
+    height: u32,
+    path: [:0]const u8,
+    option: SaveOption,
+) !void {
+    var buf = try allocator.alloc(u8, width * height * 4);
+    defer allocator.free(buf);
+
+    // read pixels
+    gl.readPixels(
+        @intCast(gl.GLint, bottom_left_x),
+        @intCast(gl.GLint, bottom_left_y),
+        @intCast(gl.GLsizei, width),
+        @intCast(gl.GLsizei, height),
+        gl.GL_RGBA,
+        gl.GL_UNSIGNED_BYTE,
+        buf.ptr,
+    );
+    gl.util.checkError();
+
+    // encode file
+    var result: c_int = undefined;
+    stb_image.stbi_flip_vertically_on_write(@boolToInt(option.flip_on_write));
+    switch (option.format) {
+        .png => {
+            stb_image.stbi_write_png_compression_level =
+                @intCast(c_int, option.png_compress_level);
+            result = stb_image.stbi_write_png(
+                path,
+                @intCast(c_int, width),
+                @intCast(c_int, height),
+                @intCast(c_int, 4),
+                buf.ptr,
+                @intCast(c_int, 4),
+            );
+        },
+        .bmp => {
+            result = stb_image.stbi_write_bmp(
+                path,
+                @intCast(c_int, width),
+                @intCast(c_int, height),
+                @intCast(c_int, 4),
+                buf.ptr,
+            );
+        },
+        .tga => {
+            stb_image.stbi_write_tga_with_rle =
+                if (option.tga_rle_compress) 1 else 0;
+            result = stb_image.stbi_write_tga(
+                path,
+                @intCast(c_int, width),
+                @intCast(c_int, height),
+                @intCast(c_int, 4),
+                buf.ptr,
+            );
+        },
+        .jpg => {
+            result = stb_image.stbi_write_jpg(
+                path,
+                @intCast(c_int, width),
+                @intCast(c_int, height),
+                @intCast(c_int, 4),
+                buf.ptr,
+                @intCast(c_int, @intCast(c_int, std.math.clamp(option.jpg_quality, 1, 100))),
+            );
+        },
+    }
+    if (result == 0) {
+        return error.EncodeTextureFailed;
+    }
+}
+
 pub fn use(framebuffer: ?Self) void {
     current_fb = if (framebuffer) |fb| fb.id else 0;
+    gl.bindFramebuffer(gl.GL_FRAMEBUFFER, current_fb);
+    gl.util.checkError();
+}
+
+pub fn useByID(fb_id: ?gl.GLuint) void {
+    current_fb = if (fb_id) |id| id else 0;
     gl.bindFramebuffer(gl.GL_FRAMEBUFFER, current_fb);
     gl.util.checkError();
 }
