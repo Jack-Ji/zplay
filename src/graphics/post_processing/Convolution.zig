@@ -111,7 +111,7 @@ pub fn init(allocator: std.mem.Allocator) !Self {
 }
 
 /// free resources
-pub fn deinit(self: Self) void {
+pub fn deinit(self: *Self) void {
     self.program.deinit();
     self.quad.deinit();
 }
