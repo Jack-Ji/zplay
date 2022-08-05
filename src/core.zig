@@ -399,13 +399,13 @@ pub fn run(comptime g: Game) !void {
             var buf: [128]u8 = undefined;
             _ = std.fmt.bufPrintZ(
                 &buf,
-                "{s} | FPS:{d:.1} AVG-CPU:{d:.1}ms VSYNC:{s} MEM:{d} bytes",
+                "{s} | FPS:{d:.1} AVG-CPU:{d:.1}ms VSYNC:{s} MEM:{:.3}",
                 .{
                     g.title,
                     ctx.fps,
                     ctx.average_cpu_time,
                     if (g.enable_vsync) "ON" else "OFF",
-                    if (gpa) |a| a.total_requested_bytes else 0,
+                    std.fmt.fmtIntSizeBin(if (gpa) |a| a.total_requested_bytes else 0),
                 },
             ) catch unreachable;
             sdl.c.SDL_SetWindowTitle(ctx.window.ptr, &buf);
