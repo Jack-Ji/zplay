@@ -118,7 +118,7 @@ pub fn fromGLTF(
             )) catch unreachable;
         } else {
             var buf: [64]u8 = undefined;
-            const dirname = std.fs.path.dirname(filename);
+            const dirname = std.fs.path.dirname(filename).?;
             const image_path = std.fmt.bufPrintZ(
                 &buf,
                 "{s}{s}{s}",

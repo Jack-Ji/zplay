@@ -12,7 +12,7 @@ const Self = @This();
 
 const font_data = @embedFile("clacon2.ttf");
 
-/// font 
+/// font
 var font: ?*Font = null;
 
 /// font-atlas
@@ -30,7 +30,7 @@ var vertex_array: VertexArray = undefined;
 /// material
 var material: Material = undefined;
 
-/// renderer's input 
+/// renderer's input
 var render_data: Renderer.Input = undefined;
 
 /// maximum number of texts to be rendered
@@ -51,12 +51,12 @@ pub fn init(allocator: std.mem.Allocator, size: u32) void {
     ) catch unreachable;
     renderer = FontRenderer.init();
     vattrib = std.ArrayList(f32).initCapacity(allocator, 1000) catch unreachable;
-    vertex_array = VertexArray.init(std.testing.allocator, 1);
+    vertex_array = VertexArray.init(std.heap.c_allocator, 1);
     vertex_array.vbos[0].allocData(max_text_num * 48 * @sizeOf(f32), .dynamic_draw);
     FontRenderer.setupVertexArray(vertex_array);
     material = Material.init(.{ .single_texture = atlas.tex });
     render_data = Renderer.Input.init(
-        std.testing.allocator,
+        std.heap.c_allocator,
         &[_]Renderer.Input.VertexData{
             .{
                 .element_draw = false,

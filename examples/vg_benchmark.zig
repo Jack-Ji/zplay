@@ -48,7 +48,7 @@ fn loop(ctx: *zp.Context) anyerror!void {
     ctx.graphics.clear(true, true, true, [_]f32{ 0.3, 0.3, 0.32, 1.0 });
 
     const S = struct {
-        var positions = std.ArrayList(Vec2).init(std.testing.allocator);
+        var positions = std.ArrayList(Vec2).init(std.heap.c_allocator);
     };
 
     dig.beginFrame();
