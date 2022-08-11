@@ -287,7 +287,7 @@ pub fn run(comptime g: Game) !void {
 
     // create window
     var flags = sdl.WindowFlags{
-        .opengl = true,
+        .context = .opengl,
         .allow_high_dpi = true,
         .mouse_capture = true,
         .mouse_focus = true,
@@ -296,10 +296,10 @@ pub fn run(comptime g: Game) !void {
         flags.borderless = true;
     }
     if (g.enable_minimized) {
-        flags.minimized = true;
+        flags.dim = .minimized;
     }
     if (g.enable_maximized) {
-        flags.maximized = true;
+        flags.dim = .maximized;
     }
     var ctx: Context = .{
         .window = try sdl.createWindow(
