@@ -193,19 +193,19 @@ pub const Effect = struct {
 
     /// bulitin particle emitter: fire
     pub fn FireEmitter(
-        comptime radius: f32,
-        comptime age_initial: f32,
-        comptime color_initial: Vec4,
-        comptime color_final: Vec4,
-        comptime color_fade_age: f32,
+        comptime _radius: f32,
+        comptime _age_initial: f32,
+        comptime _color_initial: Vec4,
+        comptime _color_final: Vec4,
+        comptime _color_fade_age: f32,
     ) type {
         return struct {
             pub var sprite: ?Sprite = null;
-            pub var radius = radius;
-            pub var age_initial = age_initial;
-            pub var color_initial = color_initial;
-            pub var color_final = color_final;
-            pub var color_fade_age = color_fade_age;
+            pub var radius = _radius;
+            pub var age_initial = _age_initial;
+            pub var color_initial = _color_initial;
+            pub var color_final = _color_final;
+            pub var color_fade_age = _color_fade_age;
 
             pub fn emit(random: std.rand.Random, origin: Vec2) Particle {
                 const offset = Vec2.new(
