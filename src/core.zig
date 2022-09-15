@@ -16,6 +16,9 @@ pub const Context = struct {
     /// internal window
     window: sdl.Window,
 
+    /// window title
+    title: [:0]u8 = undefined,
+
     /// graphics context
     graphics: GraphicsContext = undefined,
 
