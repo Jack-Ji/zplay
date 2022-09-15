@@ -238,7 +238,7 @@ id: gl.GLuint = undefined,
 type: TextureType,
 
 /// texture unit
-unit: ?TextureUnit = null,
+unit: ?TextureUnit,
 
 /// internal format
 format: TextureFormat = undefined,
@@ -252,6 +252,7 @@ pub fn init(allocator: std.mem.Allocator, _type: TextureType) !*Self {
     const self = try allocator.create(Self);
     self.allocator = allocator;
     self.type = _type;
+    self.unit = null;
     gl.genTextures(1, &self.id);
     gl.util.checkError();
     return self;

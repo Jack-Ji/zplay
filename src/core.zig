@@ -86,6 +86,13 @@ pub const Context = struct {
         return sdl.pollEvent();
     }
 
+    /// set title of window
+    pub fn setTitle(self: *Context, text: []const u8) !void {
+        self.allocator.free(self.title);
+        self.title = try self.allocator.dupeZ(u8, text);
+        sdl.c.SDL_SetWindowTitle(self.window.ptr, self.title.ptr);
+    }
+
     /// toggle resizable
     pub fn toggleResizable(self: *Context, on_off: ?bool) void {
         if (on_off) |state| {
@@ -178,13 +185,6 @@ pub const Context = struct {
             @floatToInt(i32, @intToFloat(f32, w) * xrel),
             @floatToInt(i32, @intToFloat(f32, h) * yrel),
         );
-    }
-
-    /// set title of window
-    pub fn setTitle(self: *Context, text: []const u8) !void {
-        self.allocator.free(self.title);
-        self.title = try self.allocator.dupeZ(u8, text);
-        sdl.c.SDL_SetWindowTitle(self.window.ptr, self.title);
     }
 
     /// convenient text drawing
@@ -290,6 +290,7 @@ pub fn run(comptime g: Game) !void {
     try GraphicsContext.prepare(g);
 
     // create window
+    _ = sdl.c.SDL_SetHint("SDL_IME_SHOW_UI", "1");
     var flags = sdl.WindowFlags{
         .context = .opengl,
         .allow_high_dpi = true,
@@ -300,10 +301,10 @@ pub fn run(comptime g: Game) !void {
         flags.borderless = true;
     }
     if (g.enable_minimized) {
-        flags.dim = .minimized;
+        flags.minimized = true;
     }
     if (g.enable_maximized) {
-        flags.dim = .maximized;
+        flags.maximized = true;
     }
     var ctx: Context = .{
         .window = try sdl.createWindow(
@@ -335,6 +336,10 @@ pub fn run(comptime g: Game) !void {
         }
         ctx.window.destroy();
     }
+
+    // windows title
+    ctx.title = try ctx.allocator.dupeZ(u8, g.title[0..]);
+    defer ctx.allocator.free(ctx.title);
 
     // windows size thresholds
     if (g.min_size) |size| {
@@ -405,7 +410,7 @@ pub fn run(comptime g: Game) !void {
                 &buf,
                 "{s} | FPS:{d:.1} AVG-CPU:{d:.1}ms VSYNC:{s} MEM:{:.3}",
                 .{
-                    g.title,
+                    ctx.title,
                     ctx.fps,
                     ctx.average_cpu_time,
                     if (g.enable_vsync) "ON" else "OFF",
