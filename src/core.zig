@@ -177,6 +177,13 @@ pub const Context = struct {
         );
     }
 
+    /// set title of window
+    pub fn setTitle(self: *Context, text: []const u8) !void {
+        self.allocator.free(self.title);
+        self.title = try self.allocator.dupeZ(u8, text);
+        sdl.c.SDL_SetWindowTitle(self.window.ptr, self.title);
+    }
+
     /// convenient text drawing
     pub fn drawText(
         self: *Context,
