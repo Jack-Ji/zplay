@@ -9,15 +9,13 @@ fn init(ctx: *zp.Context) anyerror!void {
 fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

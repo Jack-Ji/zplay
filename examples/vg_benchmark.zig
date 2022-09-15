@@ -31,15 +31,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }
@@ -67,15 +65,14 @@ fn loop(ctx: *zp.Context) anyerror!void {
                 dig.c.ImGuiWindowFlags_NoResize |
                 dig.c.ImGuiWindowFlags_AlwaysAutoResize,
         )) {
-            var buf: [32]u8 = undefined;
-            dig.text(try std.fmt.bufPrintZ(&buf, "FPS: {d:.02}", .{dig.getIO().*.Framerate}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "ms/frame: {d:.02}", .{ctx.delta_tick * 1000}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "drawcall count: {d}", .{nvg.getDrawCallCount()}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "tigers: {d}", .{S.positions.items.len}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "shapes: {d}", .{S.positions.items.len * tiger.nshape}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "strokes: {d}", .{S.positions.items.len * tiger.nstroke}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "fills: {d}", .{S.positions.items.len * tiger.nfill}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "paths: {d}", .{S.positions.items.len * tiger.npath}));
+            dig.ztext("FPS: {d:.02}", .{dig.getIO().*.Framerate});
+            dig.ztext("ms/frame: {d:.02}", .{ctx.delta_tick * 1000});
+            dig.ztext("drawcall count: {d}", .{nvg.getDrawCallCount()});
+            dig.ztext("tigers: {d}", .{S.positions.items.len});
+            dig.ztext("shapes: {d}", .{S.positions.items.len * tiger.nshape});
+            dig.ztext("strokes: {d}", .{S.positions.items.len * tiger.nstroke});
+            dig.ztext("fills: {d}", .{S.positions.items.len * tiger.nfill});
+            dig.ztext("paths: {d}", .{S.positions.items.len * tiger.npath});
             dig.separator();
 
             // add tigers

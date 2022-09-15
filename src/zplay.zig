@@ -4,9 +4,6 @@ pub const build_options = @import("zplay_build_options");
 /// export core definitions
 pub usingnamespace @import("core.zig");
 
-/// system events
-pub const event = @import("event.zig");
-
 /// graphics module
 pub const graphics = @import("graphics.zig");
 

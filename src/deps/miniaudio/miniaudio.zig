@@ -12,7 +12,7 @@ pub const ma_bool8 = ma_uint8;
 pub const ma_bool32 = ma_uint32;
 pub const ma_handle = ?*anyopaque;
 pub const ma_ptr = ?*anyopaque;
-pub const ma_proc = ?fn () callconv(.C) void;
+pub const ma_proc = ?*const fn () callconv(.C) void;
 pub const MA_LOG_LEVEL_DEBUG: c_int = 4;
 pub const MA_LOG_LEVEL_INFO: c_int = 3;
 pub const MA_LOG_LEVEL_WARNING: c_int = 2;
@@ -50,10 +50,10 @@ pub const struct_ma_context_config = extern struct {
     custom: ma_backend_callbacks,
 };
 pub const ma_context_config = struct_ma_context_config;
-pub const ma_enum_devices_callback_proc = ?fn ([*c]ma_context, ma_device_type, [*c]const ma_device_info, ?*anyopaque) callconv(.C) ma_bool32;
-pub const ma_device_data_proc = ?fn ([*c]ma_device, ?*anyopaque, ?*const anyopaque, ma_uint32) callconv(.C) void;
-pub const ma_device_notification_proc = ?fn ([*c]const ma_device_notification) callconv(.C) void;
-pub const ma_stop_proc = ?fn ([*c]ma_device) callconv(.C) void;
+pub const ma_enum_devices_callback_proc = ?*const fn ([*c]ma_context, ma_device_type, [*c]const ma_device_info, ?*anyopaque) callconv(.C) ma_bool32;
+pub const ma_device_data_proc = ?*const fn ([*c]ma_device, ?*anyopaque, ?*const anyopaque, ma_uint32) callconv(.C) void;
+pub const ma_device_notification_proc = ?*const fn ([*c]const ma_device_notification) callconv(.C) void;
+pub const ma_stop_proc = ?*const fn ([*c]ma_device) callconv(.C) void;
 pub const ma_mutex = ma_handle;
 pub const ma_event = ma_handle;
 pub const ma_thread = ma_handle;
@@ -311,19 +311,19 @@ pub const struct_ma_device_config = extern struct {
 };
 pub const ma_device_config = struct_ma_device_config;
 pub const struct_ma_backend_callbacks = extern struct {
-    onContextInit: ?fn ([*c]ma_context, [*c]const ma_context_config, [*c]ma_backend_callbacks) callconv(.C) ma_result,
-    onContextUninit: ?fn ([*c]ma_context) callconv(.C) ma_result,
-    onContextEnumerateDevices: ?fn ([*c]ma_context, ma_enum_devices_callback_proc, ?*anyopaque) callconv(.C) ma_result,
-    onContextGetDeviceInfo: ?fn ([*c]ma_context, ma_device_type, [*c]const ma_device_id, [*c]ma_device_info) callconv(.C) ma_result,
-    onDeviceInit: ?fn ([*c]ma_device, [*c]const ma_device_config, [*c]ma_device_descriptor, [*c]ma_device_descriptor) callconv(.C) ma_result,
-    onDeviceUninit: ?fn ([*c]ma_device) callconv(.C) ma_result,
-    onDeviceStart: ?fn ([*c]ma_device) callconv(.C) ma_result,
-    onDeviceStop: ?fn ([*c]ma_device) callconv(.C) ma_result,
-    onDeviceRead: ?fn ([*c]ma_device, ?*anyopaque, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
-    onDeviceWrite: ?fn ([*c]ma_device, ?*const anyopaque, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
-    onDeviceDataLoop: ?fn ([*c]ma_device) callconv(.C) ma_result,
-    onDeviceDataLoopWakeup: ?fn ([*c]ma_device) callconv(.C) ma_result,
-    onDeviceGetInfo: ?fn ([*c]ma_device, ma_device_type, [*c]ma_device_info) callconv(.C) ma_result,
+    onContextInit: ?*const fn ([*c]ma_context, [*c]const ma_context_config, [*c]ma_backend_callbacks) callconv(.C) ma_result,
+    onContextUninit: ?*const fn ([*c]ma_context) callconv(.C) ma_result,
+    onContextEnumerateDevices: ?*const fn ([*c]ma_context, ma_enum_devices_callback_proc, ?*anyopaque) callconv(.C) ma_result,
+    onContextGetDeviceInfo: ?*const fn ([*c]ma_context, ma_device_type, [*c]const ma_device_id, [*c]ma_device_info) callconv(.C) ma_result,
+    onDeviceInit: ?*const fn ([*c]ma_device, [*c]const ma_device_config, [*c]ma_device_descriptor, [*c]ma_device_descriptor) callconv(.C) ma_result,
+    onDeviceUninit: ?*const fn ([*c]ma_device) callconv(.C) ma_result,
+    onDeviceStart: ?*const fn ([*c]ma_device) callconv(.C) ma_result,
+    onDeviceStop: ?*const fn ([*c]ma_device) callconv(.C) ma_result,
+    onDeviceRead: ?*const fn ([*c]ma_device, ?*anyopaque, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
+    onDeviceWrite: ?*const fn ([*c]ma_device, ?*const anyopaque, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
+    onDeviceDataLoop: ?*const fn ([*c]ma_device) callconv(.C) ma_result,
+    onDeviceDataLoopWakeup: ?*const fn ([*c]ma_device) callconv(.C) ma_result,
+    onDeviceGetInfo: ?*const fn ([*c]ma_device, ma_device_type, [*c]ma_device_info) callconv(.C) ma_result,
 };
 pub const ma_backend_callbacks = struct_ma_backend_callbacks;
 const struct_unnamed_25 = extern struct {
@@ -611,9 +611,9 @@ pub const ma_performance_profile_conservative: c_int = 1;
 pub const ma_performance_profile = c_uint;
 pub const ma_allocation_callbacks = extern struct {
     pUserData: ?*anyopaque,
-    onMalloc: ?fn (usize, ?*anyopaque) callconv(.C) ?*anyopaque,
-    onRealloc: ?fn (?*anyopaque, usize, ?*anyopaque) callconv(.C) ?*anyopaque,
-    onFree: ?fn (?*anyopaque, ?*anyopaque) callconv(.C) void,
+    onMalloc: ?*const fn (usize, ?*anyopaque) callconv(.C) ?*anyopaque,
+    onRealloc: ?*const fn (?*anyopaque, usize, ?*anyopaque) callconv(.C) ?*anyopaque,
+    onFree: ?*const fn (?*anyopaque, ?*anyopaque) callconv(.C) void,
 };
 pub const ma_lcg = extern struct {
     state: ma_int32,
@@ -633,7 +633,7 @@ pub extern fn ma_version_string() [*c]const u8;
 pub const __builtin_va_list = [*c]u8;
 pub const va_list = __builtin_va_list;
 pub const __gnuc_va_list = __builtin_va_list;
-pub const ma_log_callback_proc = ?fn (?*anyopaque, ma_uint32, [*c]const u8) callconv(.C) void;
+pub const ma_log_callback_proc = ?*const fn (?*anyopaque, ma_uint32, [*c]const u8) callconv(.C) void;
 pub const ma_log_callback = extern struct {
     onLog: ma_log_callback_proc,
     pUserData: ?*anyopaque,
@@ -1192,15 +1192,15 @@ pub extern fn ma_linear_resampler_get_required_input_frame_count(pResampler: [*c
 pub extern fn ma_linear_resampler_get_expected_output_frame_count(pResampler: [*c]const ma_linear_resampler, inputFrameCount: ma_uint64, pOutputFrameCount: [*c]ma_uint64) ma_result;
 pub const ma_resampling_backend = anyopaque;
 pub const ma_resampling_backend_vtable = extern struct {
-    onGetHeapSize: ?fn (?*anyopaque, [*c]const ma_resampler_config, [*c]usize) callconv(.C) ma_result,
-    onInit: ?fn (?*anyopaque, [*c]const ma_resampler_config, ?*anyopaque, [*c]?*ma_resampling_backend) callconv(.C) ma_result,
-    onUninit: ?fn (?*anyopaque, ?*ma_resampling_backend, [*c]const ma_allocation_callbacks) callconv(.C) void,
-    onProcess: ?fn (?*anyopaque, ?*ma_resampling_backend, ?*const anyopaque, [*c]ma_uint64, ?*anyopaque, [*c]ma_uint64) callconv(.C) ma_result,
-    onSetRate: ?fn (?*anyopaque, ?*ma_resampling_backend, ma_uint32, ma_uint32) callconv(.C) ma_result,
-    onGetInputLatency: ?fn (?*anyopaque, ?*const ma_resampling_backend) callconv(.C) ma_uint64,
-    onGetOutputLatency: ?fn (?*anyopaque, ?*const ma_resampling_backend) callconv(.C) ma_uint64,
-    onGetRequiredInputFrameCount: ?fn (?*anyopaque, ?*const ma_resampling_backend, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
-    onGetExpectedOutputFrameCount: ?fn (?*anyopaque, ?*const ma_resampling_backend, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
+    onGetHeapSize: ?*const fn (?*anyopaque, [*c]const ma_resampler_config, [*c]usize) callconv(.C) ma_result,
+    onInit: ?*const fn (?*anyopaque, [*c]const ma_resampler_config, ?*anyopaque, [*c]?*ma_resampling_backend) callconv(.C) ma_result,
+    onUninit: ?*const fn (?*anyopaque, ?*ma_resampling_backend, [*c]const ma_allocation_callbacks) callconv(.C) void,
+    onProcess: ?*const fn (?*anyopaque, ?*ma_resampling_backend, ?*const anyopaque, [*c]ma_uint64, ?*anyopaque, [*c]ma_uint64) callconv(.C) ma_result,
+    onSetRate: ?*const fn (?*anyopaque, ?*ma_resampling_backend, ma_uint32, ma_uint32) callconv(.C) ma_result,
+    onGetInputLatency: ?*const fn (?*anyopaque, ?*const ma_resampling_backend) callconv(.C) ma_uint64,
+    onGetOutputLatency: ?*const fn (?*anyopaque, ?*const ma_resampling_backend) callconv(.C) ma_uint64,
+    onGetRequiredInputFrameCount: ?*const fn (?*anyopaque, ?*const ma_resampling_backend, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
+    onGetExpectedOutputFrameCount: ?*const fn (?*anyopaque, ?*const ma_resampling_backend, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
 };
 pub const ma_resample_algorithm_linear: c_int = 0;
 pub const ma_resample_algorithm_custom: c_int = 1;
@@ -1462,7 +1462,7 @@ pub extern fn ma_fence_release(pFence: [*c]ma_fence) ma_result;
 pub extern fn ma_fence_wait(pFence: [*c]ma_fence) ma_result;
 pub const ma_async_notification = anyopaque;
 pub const ma_async_notification_callbacks = extern struct {
-    onSignal: ?fn (?*ma_async_notification) callconv(.C) void,
+    onSignal: ?*const fn (?*ma_async_notification) callconv(.C) void,
 };
 pub extern fn ma_async_notification_signal(pNotification: ?*ma_async_notification) ma_result;
 pub const ma_async_notification_poll = extern struct {
@@ -1510,7 +1510,7 @@ const union_unnamed_36 = extern union {
     allocation: ma_uint64,
 };
 pub const ma_job = struct_ma_job;
-pub const ma_job_proc = ?fn ([*c]ma_job) callconv(.C) ma_result;
+pub const ma_job_proc = ?*const fn ([*c]ma_job) callconv(.C) ma_result;
 const struct_unnamed_39 = extern struct {
     proc: ma_job_proc,
     data0: ma_uintptr,
@@ -1951,15 +1951,15 @@ pub extern fn ma_volume_linear_to_db(factor: f32) f32;
 pub extern fn ma_volume_db_to_linear(gain: f32) f32;
 pub const ma_data_source = anyopaque;
 pub const ma_data_source_vtable = extern struct {
-    onRead: ?fn (?*ma_data_source, ?*anyopaque, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
-    onSeek: ?fn (?*ma_data_source, ma_uint64) callconv(.C) ma_result,
-    onGetDataFormat: ?fn (?*ma_data_source, [*c]ma_format, [*c]ma_uint32, [*c]ma_uint32, [*c]ma_channel, usize) callconv(.C) ma_result,
-    onGetCursor: ?fn (?*ma_data_source, [*c]ma_uint64) callconv(.C) ma_result,
-    onGetLength: ?fn (?*ma_data_source, [*c]ma_uint64) callconv(.C) ma_result,
-    onSetLooping: ?fn (?*ma_data_source, ma_bool32) callconv(.C) ma_result,
+    onRead: ?*const fn (?*ma_data_source, ?*anyopaque, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result,
+    onSeek: ?*const fn (?*ma_data_source, ma_uint64) callconv(.C) ma_result,
+    onGetDataFormat: ?*const fn (?*ma_data_source, [*c]ma_format, [*c]ma_uint32, [*c]ma_uint32, [*c]ma_channel, usize) callconv(.C) ma_result,
+    onGetCursor: ?*const fn (?*ma_data_source, [*c]ma_uint64) callconv(.C) ma_result,
+    onGetLength: ?*const fn (?*ma_data_source, [*c]ma_uint64) callconv(.C) ma_result,
+    onSetLooping: ?*const fn (?*ma_data_source, ma_bool32) callconv(.C) ma_result,
     flags: ma_uint32,
 };
-pub const ma_data_source_get_next_proc = ?fn (?*ma_data_source) callconv(.C) ?*ma_data_source;
+pub const ma_data_source_get_next_proc = ?*const fn (?*ma_data_source) callconv(.C) ?*ma_data_source;
 pub const ma_data_source_config = extern struct {
     vtable: [*c]const ma_data_source_vtable,
 };
@@ -2094,14 +2094,14 @@ pub const ma_file_info = extern struct {
     sizeInBytes: ma_uint64,
 };
 pub const ma_vfs_callbacks = extern struct {
-    onOpen: ?fn (?*ma_vfs, [*c]const u8, ma_uint32, [*c]ma_vfs_file) callconv(.C) ma_result,
-    onOpenW: ?fn (?*ma_vfs, [*c]const wchar_t, ma_uint32, [*c]ma_vfs_file) callconv(.C) ma_result,
-    onClose: ?fn (?*ma_vfs, ma_vfs_file) callconv(.C) ma_result,
-    onRead: ?fn (?*ma_vfs, ma_vfs_file, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result,
-    onWrite: ?fn (?*ma_vfs, ma_vfs_file, ?*const anyopaque, usize, [*c]usize) callconv(.C) ma_result,
-    onSeek: ?fn (?*ma_vfs, ma_vfs_file, ma_int64, ma_seek_origin) callconv(.C) ma_result,
-    onTell: ?fn (?*ma_vfs, ma_vfs_file, [*c]ma_int64) callconv(.C) ma_result,
-    onInfo: ?fn (?*ma_vfs, ma_vfs_file, [*c]ma_file_info) callconv(.C) ma_result,
+    onOpen: ?*const fn (?*ma_vfs, [*c]const u8, ma_uint32, [*c]ma_vfs_file) callconv(.C) ma_result,
+    onOpenW: ?*const fn (?*ma_vfs, [*c]const wchar_t, ma_uint32, [*c]ma_vfs_file) callconv(.C) ma_result,
+    onClose: ?*const fn (?*ma_vfs, ma_vfs_file) callconv(.C) ma_result,
+    onRead: ?*const fn (?*ma_vfs, ma_vfs_file, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result,
+    onWrite: ?*const fn (?*ma_vfs, ma_vfs_file, ?*const anyopaque, usize, [*c]usize) callconv(.C) ma_result,
+    onSeek: ?*const fn (?*ma_vfs, ma_vfs_file, ma_int64, ma_seek_origin) callconv(.C) ma_result,
+    onTell: ?*const fn (?*ma_vfs, ma_vfs_file, [*c]ma_int64) callconv(.C) ma_result,
+    onInfo: ?*const fn (?*ma_vfs, ma_vfs_file, [*c]ma_file_info) callconv(.C) ma_result,
 };
 pub extern fn ma_vfs_open(pVFS: ?*ma_vfs, pFilePath: [*c]const u8, openMode: ma_uint32, pFile: [*c]ma_vfs_file) ma_result;
 pub extern fn ma_vfs_open_w(pVFS: ?*ma_vfs, pFilePath: [*c]const wchar_t, openMode: ma_uint32, pFile: [*c]ma_vfs_file) ma_result;
@@ -2117,9 +2117,9 @@ pub const ma_default_vfs = extern struct {
     allocationCallbacks: ma_allocation_callbacks,
 };
 pub extern fn ma_default_vfs_init(pVFS: [*c]ma_default_vfs, pAllocationCallbacks: [*c]const ma_allocation_callbacks) ma_result;
-pub const ma_read_proc = ?fn (?*anyopaque, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result;
-pub const ma_seek_proc = ?fn (?*anyopaque, ma_int64, ma_seek_origin) callconv(.C) ma_result;
-pub const ma_tell_proc = ?fn (?*anyopaque, [*c]ma_int64) callconv(.C) ma_result;
+pub const ma_read_proc = ?*const fn (?*anyopaque, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result;
+pub const ma_seek_proc = ?*const fn (?*anyopaque, ma_int64, ma_seek_origin) callconv(.C) ma_result;
+pub const ma_tell_proc = ?*const fn (?*anyopaque, [*c]ma_int64) callconv(.C) ma_result;
 pub const ma_encoding_format_unknown: c_int = 0;
 pub const ma_encoding_format_wav: c_int = 1;
 pub const ma_encoding_format_flac: c_int = 2;
@@ -2127,9 +2127,9 @@ pub const ma_encoding_format_mp3: c_int = 3;
 pub const ma_encoding_format_vorbis: c_int = 4;
 pub const ma_encoding_format = c_uint;
 pub const ma_decoder = struct_ma_decoder;
-pub const ma_decoder_read_proc = ?fn ([*c]ma_decoder, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result;
-pub const ma_decoder_seek_proc = ?fn ([*c]ma_decoder, ma_int64, ma_seek_origin) callconv(.C) ma_result;
-pub const ma_decoder_tell_proc = ?fn ([*c]ma_decoder, [*c]ma_int64) callconv(.C) ma_result;
+pub const ma_decoder_read_proc = ?*const fn ([*c]ma_decoder, ?*anyopaque, usize, [*c]usize) callconv(.C) ma_result;
+pub const ma_decoder_seek_proc = ?*const fn ([*c]ma_decoder, ma_int64, ma_seek_origin) callconv(.C) ma_result;
+pub const ma_decoder_tell_proc = ?*const fn ([*c]ma_decoder, [*c]ma_int64) callconv(.C) ma_result;
 const struct_unnamed_65 = extern struct {
     pVFS: ?*ma_vfs,
     file: ma_vfs_file,
@@ -2170,11 +2170,11 @@ pub const ma_decoding_backend_config = extern struct {
 };
 pub extern fn ma_decoding_backend_config_init(preferredFormat: ma_format, seekPointCount: ma_uint32) ma_decoding_backend_config;
 pub const ma_decoding_backend_vtable = extern struct {
-    onInit: ?fn (?*anyopaque, ma_read_proc, ma_seek_proc, ma_tell_proc, ?*anyopaque, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
-    onInitFile: ?fn (?*anyopaque, [*c]const u8, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
-    onInitFileW: ?fn (?*anyopaque, [*c]const wchar_t, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
-    onInitMemory: ?fn (?*anyopaque, ?*const anyopaque, usize, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
-    onUninit: ?fn (?*anyopaque, ?*ma_data_source, [*c]const ma_allocation_callbacks) callconv(.C) void,
+    onInit: ?*const fn (?*anyopaque, ma_read_proc, ma_seek_proc, ma_tell_proc, ?*anyopaque, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
+    onInitFile: ?*const fn (?*anyopaque, [*c]const u8, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
+    onInitFileW: ?*const fn (?*anyopaque, [*c]const wchar_t, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
+    onInitMemory: ?*const fn (?*anyopaque, ?*const anyopaque, usize, [*c]const ma_decoding_backend_config, [*c]const ma_allocation_callbacks, [*c]?*ma_data_source) callconv(.C) ma_result,
+    onUninit: ?*const fn (?*anyopaque, ?*ma_data_source, [*c]const ma_allocation_callbacks) callconv(.C) void,
 };
 pub const ma_decoder_config = extern struct {
     format: ma_format,
@@ -2210,11 +2210,11 @@ pub extern fn ma_decode_from_vfs(pVFS: ?*ma_vfs, pFilePath: [*c]const u8, pConfi
 pub extern fn ma_decode_file(pFilePath: [*c]const u8, pConfig: [*c]ma_decoder_config, pFrameCountOut: [*c]ma_uint64, ppPCMFramesOut: [*c]?*anyopaque) ma_result;
 pub extern fn ma_decode_memory(pData: ?*const anyopaque, dataSize: usize, pConfig: [*c]ma_decoder_config, pFrameCountOut: [*c]ma_uint64, ppPCMFramesOut: [*c]?*anyopaque) ma_result;
 pub const ma_encoder = struct_ma_encoder;
-pub const ma_encoder_write_proc = ?fn ([*c]ma_encoder, ?*const anyopaque, usize, [*c]usize) callconv(.C) ma_result;
-pub const ma_encoder_seek_proc = ?fn ([*c]ma_encoder, ma_int64, ma_seek_origin) callconv(.C) ma_result;
-pub const ma_encoder_init_proc = ?fn ([*c]ma_encoder) callconv(.C) ma_result;
-pub const ma_encoder_uninit_proc = ?fn ([*c]ma_encoder) callconv(.C) void;
-pub const ma_encoder_write_pcm_frames_proc = ?fn ([*c]ma_encoder, ?*const anyopaque, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result;
+pub const ma_encoder_write_proc = ?*const fn ([*c]ma_encoder, ?*const anyopaque, usize, [*c]usize) callconv(.C) ma_result;
+pub const ma_encoder_seek_proc = ?*const fn ([*c]ma_encoder, ma_int64, ma_seek_origin) callconv(.C) ma_result;
+pub const ma_encoder_init_proc = ?*const fn ([*c]ma_encoder) callconv(.C) ma_result;
+pub const ma_encoder_uninit_proc = ?*const fn ([*c]ma_encoder) callconv(.C) void;
+pub const ma_encoder_write_pcm_frames_proc = ?*const fn ([*c]ma_encoder, ?*const anyopaque, ma_uint64, [*c]ma_uint64) callconv(.C) ma_result;
 const struct_unnamed_68 = extern struct {
     pVFS: ?*ma_vfs,
     file: ma_vfs_file,
@@ -2588,8 +2588,8 @@ pub const ma_node_state_started: c_int = 0;
 pub const ma_node_state_stopped: c_int = 1;
 pub const ma_node_state = c_uint;
 pub const ma_node_vtable = extern struct {
-    onProcess: ?fn (?*ma_node, [*c][*c]const f32, [*c]ma_uint32, [*c][*c]f32, [*c]ma_uint32) callconv(.C) void,
-    onGetRequiredInputFrameCount: ?fn (?*ma_node, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
+    onProcess: ?*const fn (?*ma_node, [*c][*c]const f32, [*c]ma_uint32, [*c][*c]f32, [*c]ma_uint32) callconv(.C) void,
+    onGetRequiredInputFrameCount: ?*const fn (?*ma_node, ma_uint32, [*c]ma_uint32) callconv(.C) ma_result,
     inputBusCount: ma_uint8,
     outputBusCount: ma_uint8,
     flags: ma_uint32,

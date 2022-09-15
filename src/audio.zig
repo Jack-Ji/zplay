@@ -206,7 +206,7 @@ pub const Engine = struct {
 
         const rc = miniaudio.ma_sound_init_from_file(
             &e.engine,
-            path,
+            path.ptr,
             opt.toInt(),
             if (group) |g| &g.group else null,
             null,

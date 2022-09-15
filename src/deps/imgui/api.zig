@@ -40,7 +40,7 @@ pub const styleColorsClassic = c.igStyleColorsClassic;
 //    returned true. Begin and BeginChild are the only odd ones out. Will be fixed in a future update.]
 // - Note that the bottom of window stack always contains a window called "Debug".
 pub fn begin(name: [:0]const u8, p_open: ?*bool, flags: ?c.ImGuiWindowFlags) bool {
-    return c.igBegin(name, p_open, flags orelse 0);
+    return c.igBegin(name.ptr, p_open, flags orelse 0);
 }
 pub const end = c.igEnd;
 
@@ -75,7 +75,9 @@ pub fn isWindowFocused(flags: ?c.ImGuiFocusedFlags) bool {
 pub fn isWindowHovered(flags: ?c.ImGuiHoveredFlags) bool {
     return c.igIsWindowHovered(flags orelse 0);
 }
-pub const getWindowDrawList = c.igGetWindowDrawList;
+pub fn getWindowDrawList() DrawList {
+    return .{ ._dl = c.igGetWindowDrawList() };
+}
 pub fn getWindowPos(pOut: *c.ImVec2) void {
     return c.igGetWindowPos(pOut);
 }
@@ -339,7 +341,7 @@ pub const text = c.igText;
 pub fn ztext(comptime fmt: []const u8, args: anytype) void {
     var buf = [_]u8{0} ** 128;
     var info = std.fmt.bufPrintZ(&buf, fmt, args) catch unreachable;
-    text(info);
+    text(info.ptr);
 }
 pub const textColored = c.igTextColored;
 pub const textDisabled = c.igTextDisabled;
@@ -351,7 +353,7 @@ pub const bulletText = c.igBulletText;
 // - Most widgets return true when the value has been changed or when pressed/selected
 // - You may also use one of the many IsItemXXX functions (e.g. IsItemActive, IsItemHovered, etc.) to query widget state.
 pub fn button(label: [:0]const u8, size: ?c.ImVec2) bool {
-    return c.igButton(label, size orelse vec2_zero);
+    return c.igButton(label.ptr, size orelse vec2_zero);
 }
 pub fn smallButton(label: [:0]const u8) bool {
     return c.igSmallButton(label);
@@ -382,19 +384,19 @@ pub fn imageButton(user_texture_id: c.ImTextureID, size: c.ImVec2, option: Image
     return c.igImageButton(user_texture_id, size, option.uv0, option.uv1, option.frame_padding, option.bg_col, option.tint_col);
 }
 pub fn checkbox(label: [:0]const u8, v: *bool) bool {
-    return c.igCheckbox(label, v);
+    return c.igCheckbox(label.ptr, v);
 }
 pub fn checkboxFlags_IntPtr(label: [:0]const u8, flags: *c_int, flags_value: c_int) bool {
-    return c.igCheckboxFlags_IntPtr(label, flags, flags_value);
+    return c.igCheckboxFlags_IntPtr(label.ptr, flags, flags_value);
 }
 pub fn checkboxFlags_UintPtr(label: [:0]const u8, flags: [*c]c_uint, flags_value: c_uint) bool {
-    return c.igCheckboxFlags_UintPtr(label, flags, flags_value);
+    return c.igCheckboxFlags_UintPtr(label.ptr, flags, flags_value);
 }
 pub fn radioButton_Bool(label: [:0]const u8, active: bool) bool {
-    return c.igRadioButton_Bool(label, active);
+    return c.igRadioButton_Bool(label.ptr, active);
 }
 pub fn radioButton_IntPtr(label: [:0]const u8, v: *c_int, v_button: c_int) bool {
-    return c.igRadioButton_IntPtr(label, v, v_button);
+    return c.igRadioButton_IntPtr(label.ptr, v, v_button);
 }
 pub const ProgressBarOption = struct {
     size_arg: c.ImVec2 = .{ .x = math.f32_min, .y = 0 },
@@ -409,17 +411,17 @@ pub const bullet = c.igBullet;
 // - The BeginCombo()/EndCombo() api allows you to manage your contents and selection state however you want it, by creating e.g. Selectable() items.
 // - The old Combo() api are helpers over BeginCombo()/EndCombo() which are kept available for convenience purpose. This is analogous to how ListBox are created.
 pub fn beginCombo(label: [:0]const u8, preview_value: [:0]const u8, flags: ?c.ImGuiComboFlags) bool {
-    return c.igBeginCombo(label, preview_value, flags orelse 0);
+    return c.igBeginCombo(label.ptr, preview_value.ptr, flags orelse 0);
 }
 pub const endCombo = c.igEndCombo;
 pub fn combo_Str_arr(label: [:0]const u8, current_item: *c_int, items: []const [*c]const u8, popup_max_height_in_items: ?c_int) bool {
-    return c.igCombo_Str_arr(label, current_item, items.ptr, items.len, popup_max_height_in_items orelse -1);
+    return c.igCombo_Str_arr(label.ptr, current_item, items.ptr, items.len, popup_max_height_in_items orelse -1);
 }
 pub fn combo_Str(label: [:0]const u8, current_item: *c_int, items_separated_by_zeros: [:0]const u8, popup_max_height_in_items: ?c_int) bool {
-    return c.igCombo_Str(label, current_item, items_separated_by_zeros, popup_max_height_in_items orelse -1);
+    return c.igCombo_Str(label.ptr, current_item, items_separated_by_zeros.ptr, popup_max_height_in_items orelse -1);
 }
 pub fn combo_FnBoolPtr(label: [:0]const u8, current_item: *c_int, items_getter: fn (?*anyopaque, c_int, [*c][*c]const u8) callconv(.C) bool, data: ?*anyopaque, items_count: c_int, popup_max_height_in_items: ?c_int) bool {
-    return c.igCombo_FnBoolPtr(label, current_item, items_getter, data, items_count, popup_max_height_in_items orelse -1);
+    return c.igCombo_FnBoolPtr(label.ptr, current_item, items_getter, data, items_count, popup_max_height_in_items orelse -1);
 }
 
 // Widgets: Drag Sliders
@@ -441,16 +443,16 @@ pub const DragFloatOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn dragFloat(label: [:0]const u8, v: *f32, option: DragFloatOption) bool {
-    return c.igDragFloat(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragFloat(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragFloat2(label: [:0]const u8, v: *[2]f32, option: DragFloatOption) bool {
-    return c.igDragFloat2(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragFloat2(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragFloat3(label: [:0]const u8, v: *[3]f32, option: DragFloatOption) bool {
-    return c.igDragFloat3(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragFloat3(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragFloat4(label: [:0]const u8, v: *[4]f32, option: DragFloatOption) bool {
-    return c.igDragFloat4(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragFloat4(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub const DragFloatRangeOption = struct {
     v_speed: f32 = 1,
@@ -461,7 +463,7 @@ pub const DragFloatRangeOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn dragFloatRange2(label: [:0]const u8, v_current_min: *f32, v_current_max: *f32, option: DragFloatRangeOption) bool {
-    return c.igDragFloatRange2(label, v_current_min, v_current_max, option.v_speed, option.v_min, option.v_max, option.format, option.format_max, option.flags);
+    return c.igDragFloatRange2(label.ptr, v_current_min, v_current_max, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.format_max, option.flags);
 }
 pub const DragIntOption = struct {
     v_speed: f32 = 1,
@@ -471,16 +473,16 @@ pub const DragIntOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn dragInt(label: [:0]const u8, v: *c_int, option: DragIntOption) bool {
-    return c.igDragInt(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragInt(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragInt2(label: [:0]const u8, v: *c_int, option: DragIntOption) bool {
-    return c.igDragInt2(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragInt2(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragInt3(label: [:0]const u8, v: *c_int, option: DragIntOption) bool {
-    return c.igDragInt3(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragInt3(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub fn dragInt4(label: [:0]const u8, v: *c_int, option: DragIntOption) bool {
-    return c.igDragInt4(label, v, option.v_speed, option.v_min, option.v_max, option.format, option.flags);
+    return c.igDragInt4(label.ptr, v, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.flags);
 }
 pub const DragIntRangeOption = struct {
     v_speed: f32 = 1,
@@ -491,7 +493,7 @@ pub const DragIntRangeOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn dragIntRange2(label: [:0]const u8, v_current_min: *c_int, v_current_max: *c_int, option: DragIntRangeOption) bool {
-    return c.igDragIntRange2(label, v_current_min, v_current_max, option.v_speed, option.v_min, option.v_max, option.format, option.format_max, option.flags);
+    return c.igDragIntRange2(label.ptr, v_current_min, v_current_max, option.v_speed, option.v_min, option.v_max, option.format.ptr, option.format_max, option.flags);
 }
 pub const DragScalarOption = struct {
     v_speed: f32 = 1,
@@ -501,10 +503,10 @@ pub const DragScalarOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn dragScalar(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, option: DragScalarOption) bool {
-    return c.igDragScalar(label, data_type, p_data, option.v_speed, option.p_min, option.p_max, option.format, option.flags);
+    return c.igDragScalar(label.ptr, data_type, p_data, option.v_speed, option.p_min, option.p_max, option.format.ptr, option.flags);
 }
 pub fn dragScalarN(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, components: c_int, option: DragScalarOption) bool {
-    return c.igDragScalarN(label, data_type, p_data, components, option.v_speed, option.p_min, option.p_max, option.format, option.flags);
+    return c.igDragScalarN(label.ptr, data_type, p_data, components, option.v_speed, option.p_min, option.p_max, option.format.ptr, option.flags);
 }
 
 // Widgets: Regular Sliders
@@ -518,16 +520,16 @@ pub const SliderFloatOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn sliderFloat(label: [:0]const u8, v: *f32, v_min: f32, v_max: f32, option: SliderFloatOption) bool {
-    return c.igSliderFloat(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderFloat(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderFloat2(label: [:0]const u8, v: *[2]f32, v_min: f32, v_max: f32, option: SliderFloatOption) bool {
-    return c.igSliderFloat2(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderFloat2(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderFloat3(label: [:0]const u8, v: *[2]f32, v_min: f32, v_max: f32, option: SliderFloatOption) bool {
-    return c.igSliderFloat3(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderFloat3(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderFloat4(label: [:0]const u8, v: *[3]f32, v_min: f32, v_max: f32, option: SliderFloatOption) bool {
-    return c.igSliderFloat4(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderFloat4(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub const SliderAngleOption = struct {
     v_degrees_min: f32 = -360.0,
@@ -536,54 +538,54 @@ pub const SliderAngleOption = struct {
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn sliderAngle(label: [:0]const u8, v_rad: *f32, option: SliderAngleOption) bool {
-    return c.igSliderAngle(label, v_rad, option.v_degrees_min, option.v_degrees_max, option.format, option.flags);
+    return c.igSliderAngle(label.ptr, v_rad, option.v_degrees_min, option.v_degrees_max, option.format.ptr, option.flags);
 }
 pub const SliderIntOption = struct {
     format: [:0]const u8 = "%d",
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn sliderInt(label: [:0]const u8, v: *c_int, v_min: c_int, v_max: c_int, option: SliderIntOption) bool {
-    return c.igSliderInt(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderInt(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderInt2(label: [:0]const u8, v: *c_int, v_min: c_int, v_max: c_int, option: SliderIntOption) bool {
-    return c.igSliderInt2(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderInt2(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderInt3(label: [:0]const u8, v: *c_int, v_min: c_int, v_max: c_int, option: SliderIntOption) bool {
-    return c.igSliderInt3(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderInt3(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub fn sliderInt4(label: [:0]const u8, v: *c_int, v_min: c_int, v_max: c_int, option: SliderIntOption) bool {
-    return c.igSliderInt4(label, v, v_min, v_max, option.format, option.flags);
+    return c.igSliderInt4(label.ptr, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub const SliderScalarOption = struct {
     format: ?[:0]const u8 = null,
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn sliderScalar(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, p_min: *const anyopaque, p_max: *const anyopaque, option: SliderScalarOption) bool {
-    return c.igSliderScalar(label, data_type, p_data, p_min, p_max, option.format, option.flags);
+    return c.igSliderScalar(label.ptr, data_type, p_data, p_min, p_max, option.format.ptr, option.flags);
 }
 pub fn sliderScalarN(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, components: c_int, p_min: *const anyopaque, p_max: *const anyopaque, option: SliderScalarOption) bool {
-    return c.igSliderScalarN(label, data_type, p_data, components, p_min, p_max, option.format, option.flags);
+    return c.igSliderScalarN(label.ptr, data_type, p_data, components, p_min, p_max, option.format.ptr, option.flags);
 }
 pub const VSliderFloatOption = struct {
     format: [:0]const u8 = "%.3f",
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn vSliderFloat(label: [:0]const u8, size: c.ImVec2, v: *f32, v_min: f32, v_max: f32, option: VSliderFloatOption) bool {
-    return c.igVSliderFloat(label, size, v, v_min, v_max, option.format, option.flags);
+    return c.igVSliderFloat(label.ptr, size, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub const VSliderIntOption = struct {
     format: [:0]const u8 = "%d",
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn vSliderInt(label: [:0]const u8, size: c.ImVec2, v: *c_int, v_min: c_int, v_max: c_int, option: VSliderIntOption) bool {
-    return c.igVSliderInt(label, size, v, v_min, v_max, option.format, option.flags);
+    return c.igVSliderInt(label.ptr, size, v, v_min, v_max, option.format.ptr, option.flags);
 }
 pub const VSliderScalarOption = struct {
     format: ?[:0]const u8 = null,
     flags: c.ImGuiSliderFlags = 0,
 };
 pub fn vSliderScalar(label: [:0]const u8, size: c.ImVec2, data_type: c.ImGuiDataType, p_data: *anyopaque, p_min: *const anyopaque, p_max: *const anyopaque, option: VSliderScalarOption) bool {
-    return c.igVSliderScalar(label, size, data_type, p_data, p_min, p_max, option.format, option.flags);
+    return c.igVSliderScalar(label.ptr, size, data_type, p_data, p_min, p_max, option.format.ptr, option.flags);
 }
 
 // Widgets: Input with Keyboard
@@ -595,7 +597,7 @@ pub const InputTextOption = struct {
     user_data: ?*anyopaque = null,
 };
 pub fn inputText(label: [:0]const u8, buf: []u8, option: InputTextOption) bool {
-    return c.igInputText(label, buf.ptr, buf.len, option.flags, option.callback, option.user_data);
+    return c.igInputText(label.ptr, buf.ptr, buf.len, option.flags, option.callback, option.user_data);
 }
 pub const InputTextMultilineOption = struct {
     size: c.ImVec2 = vec2_zero,
@@ -604,10 +606,10 @@ pub const InputTextMultilineOption = struct {
     user_data: ?*anyopaque = null,
 };
 pub fn inputTextMultiline(label: [:0]const u8, buf: []u8, option: InputTextMultilineOption) bool {
-    return c.igInputTextMultiline(label, buf.ptr, buf.len, option.size, option.flags, option.callback, option.user_data);
+    return c.igInputTextMultiline(label.ptr, buf.ptr, buf.len, option.size, option.flags, option.callback, option.user_data);
 }
 pub fn inputTextWithHint(label: [:0]const u8, hint: [:0]const u8, buf: []u8, option: InputTextOption) bool {
-    return c.igInputTextWithHint(label, hint, buf.ptr, buf.len, option.flags, option.callback, option.user_data);
+    return c.igInputTextWithHint(label.ptr, hint, buf.ptr, buf.len, option.flags, option.callback, option.user_data);
 }
 pub const InputFloatOption = struct {
     step: f32 = 0,
@@ -616,20 +618,20 @@ pub const InputFloatOption = struct {
     flags: c.ImGuiInputTextFlags = 0,
 };
 pub fn inputFloat(label: [:0]const u8, v: *f32, option: InputFloatOption) bool {
-    return c.igInputFloat(label, v, option.step, option.step_fast, option.format, option.flags);
+    return c.igInputFloat(label.ptr, v, option.step, option.step_fast, option.format.ptr, option.flags);
 }
 pub const InputFloatsOption = struct {
     format: [:0]const u8 = "%.3f",
     flags: c.ImGuiInputTextFlags = 0,
 };
 pub fn inputFloat2(label: [:0]const u8, v: *[2]f32, option: InputFloatsOption) bool {
-    return c.igInputFloat2(label, v, option.format, option.flags);
+    return c.igInputFloat2(label.ptr, v, option.format.ptr, option.flags);
 }
 pub fn inputFloat3(label: [:0]const u8, v: *[3]f32, option: InputFloatsOption) bool {
-    return c.igInputFloat3(label, v, option.format, option.flags);
+    return c.igInputFloat3(label.ptr, v, option.format.ptr, option.flags);
 }
 pub fn inputFloat4(label: [:0]const u8, v: *[4]f32, option: InputFloatsOption) bool {
-    return c.igInputFloat4(label, v, option.format, option.flags);
+    return c.igInputFloat4(label.ptr, v, option.format.ptr, option.flags);
 }
 pub const InputIntOption = struct {
     step: c_int = 1,
@@ -637,16 +639,16 @@ pub const InputIntOption = struct {
     flags: c.ImGuiInputTextFlags = 0,
 };
 pub fn inputInt(label: [:0]const u8, v: *c_int, option: InputIntOption) bool {
-    return c.igInputInt(label, v, option.step, option.step_fast, option.flags);
+    return c.igInputInt(label.ptr, v, option.step, option.step_fast, option.flags);
 }
 pub fn inputInt2(label: [:0]const u8, v: *[2]c_int, flags: ?c.ImGuiInputTextFlags) bool {
-    return c.igInputInt2(label, v, flags orelse 0);
+    return c.igInputInt2(label.ptr, v, flags orelse 0);
 }
 pub fn inputInt3(label: [:0]const u8, v: *[3]c_int, flags: ?c.ImGuiInputTextFlags) bool {
-    return c.igInputInt3(label, v, flags orelse 0);
+    return c.igInputInt3(label.ptr, v, flags orelse 0);
 }
 pub fn inputInt4(label: [:0]const u8, v: *[4]c_int, flags: ?c.ImGuiInputTextFlags) bool {
-    return c.igInputInt4(label, v, flags orelse 0);
+    return c.igInputInt4(label.ptr, v, flags orelse 0);
 }
 pub const InputDoubleOption = struct {
     step: f64 = 0,
@@ -655,7 +657,7 @@ pub const InputDoubleOption = struct {
     flags: c.ImGuiInputTextFlags = 0,
 };
 pub fn inputDouble(label: [:0]const u8, v: *f64, option: InputDoubleOption) bool {
-    return c.igInputDouble(label, v, option.step, option.step_fast, option.format, option.flags);
+    return c.igInputDouble(label.ptr, v, option.step, option.step_fast, option.format.ptr, option.flags);
 }
 pub const InputScalarOption = struct {
     p_step: ?*const anyopaque = null,
@@ -664,26 +666,26 @@ pub const InputScalarOption = struct {
     flags: c.ImGuiInputTextFlags = 0,
 };
 pub fn inputScalar(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, option: InputScalarOption) bool {
-    return c.igInputScalar(label, data_type, p_data, option.p_step, option.p_step_fast, option.format, option.flags);
+    return c.igInputScalar(label.ptr, data_type, p_data, option.p_step, option.p_step_fast, option.format.ptr, option.flags);
 }
 pub fn inputScalarN(label: [:0]const u8, data_type: c.ImGuiDataType, p_data: *anyopaque, components: c_int, option: InputScalarOption) bool {
-    return c.igInputScalarN(label, data_type, p_data, components, option.p_step, option.p_step_fast, option.format, option.flags);
+    return c.igInputScalarN(label.ptr, data_type, p_data, components, option.p_step, option.p_step_fast, option.format.ptr, option.flags);
 }
 
 // Widgets: Color Editor/Picker (tip: the ColorEdit* functions have a little color square that can be left-clicked to open a picker, and right-clicked to open an option menu.)
 // - Note that in C++ a 'float v[X]' function argument is the _same_ as 'float* v', the array syntax is just a way to document the number of elements that are expected to be accessible.
 // - You can pass the address of a first float element out of a contiguous structure, e.g. &myvector.x
 pub fn colorEdit3(label: [:0]const u8, col: *[3]f32, flags: ?c.ImGuiColorEditFlags) bool {
-    return c.igColorEdit3(label, col, flags orelse 0);
+    return c.igColorEdit3(label.ptr, col, flags orelse 0);
 }
 pub fn colorEdit4(label: [:0]const u8, col: *[4]f32, flags: ?c.ImGuiColorEditFlags) bool {
-    return c.igColorEdit4(label, col, flags orelse 0);
+    return c.igColorEdit4(label.ptr, col, flags orelse 0);
 }
 pub fn colorPicker3(label: [:0]const u8, col: *[3]f32, flags: ?c.ImGuiColorEditFlags) bool {
-    return c.igColorPicker3(label, col, flags orelse 0);
+    return c.igColorPicker3(label.ptr, col, flags orelse 0);
 }
 pub fn colorPicker4(label: [:0]const u8, col: *[4]f32, flags: ?c.ImGuiColorEditFlags, ref_col: ?*[4]f32) bool {
-    return c.igColorPicker4(label, col, flags orelse 0, ref_col);
+    return c.igColorPicker4(label.ptr, col, flags orelse 0, ref_col);
 }
 pub const ColorButtonOption = struct {
     flags: c.ImGuiColorEditFlags = 0,
@@ -715,10 +717,10 @@ pub fn treePush_Ptr(ptr_id: *const anyopaque) void {
 pub const treePop = c.igTreePop;
 pub const getTreeNodeToLabelSpacing = c.igGetTreeNodeToLabelSpacing;
 pub fn collapsingHeader_TreeNodeFlags(label: [:0]const u8, flags: ?c.ImGuiTreeNodeFlags) bool {
-    return c.igCollapsingHeader_TreeNodeFlags(label, flags orelse 0);
+    return c.igCollapsingHeader_TreeNodeFlags(label.ptr, flags orelse 0);
 }
 pub fn collapsingHeader_BoolPtr(label: [:0]const u8, p_visible: *bool, flags: ?c.ImGuiTreeNodeFlags) bool {
-    return c.igCollapsingHeader_BoolPtr(label, p_visible, flags orelse 0);
+    return c.igCollapsingHeader_BoolPtr(label.ptr, p_visible, flags orelse 0);
 }
 pub fn setNextItemOpen(is_open: bool, cond: ?c.ImGuiCond) void {
     return c.igSetNextItemOpen(is_open, cond orelse 0);
@@ -733,14 +735,14 @@ pub const SelectableOption = struct {
     size: c.ImVec2 = vec2_zero,
 };
 pub fn selectable_Bool(label: [:0]const u8, option: SelectableOption) bool {
-    return c.igSelectable_Bool(label, option.selected, option.flags, option.size);
+    return c.igSelectable_Bool(label.ptr, option.selected, option.flags, option.size);
 }
 pub const SelectablePtrOption = struct {
     flags: c.ImGuiSelectableFlags,
     size: c.ImVec2,
 };
 pub fn selectable_BoolPtr(label: [:0]const u8, p_selected: *bool, option: SelectablePtrOption) bool {
-    return c.igSelectable_BoolPtr(label, p_selected, option.flags, option.size);
+    return c.igSelectable_BoolPtr(label.ptr, p_selected, option.flags, option.size);
 }
 
 // Widgets: List Boxes
@@ -750,14 +752,14 @@ pub fn selectable_BoolPtr(label: [:0]const u8, p_selected: *bool, option: Select
 // - Choose frame width:   size.x > 0.0f: custom  /  size.x < 0.0f or -FLT_MIN: right-align   /  size.x = 0.0f (default): use current ItemWidth
 // - Choose frame height:  size.y > 0.0f: custom  /  size.y < 0.0f or -FLT_MIN: bottom-align  /  size.y = 0.0f (default): arbitrary default height which can fit ~7 items
 pub fn beginListBox(label: [:0]const u8, size: ?c.ImVec2) bool {
-    return c.igBeginListBox(label, size orelse vec2_zero);
+    return c.igBeginListBox(label.ptr, size orelse vec2_zero);
 }
 pub const endListBox = c.igEndListBox;
 pub fn listBox_Str_arr(label: [:0]const u8, current_item: *c_int, items: []const [*c]const u8, height_in_items: ?c_int) bool {
-    return c.igListBox_Str_arr(label, current_item, items.ptr, @intCast(c_int, items.len), height_in_items orelse -1);
+    return c.igListBox_Str_arr(label.ptr, current_item, items.ptr, @intCast(c_int, items.len), height_in_items orelse -1);
 }
 pub fn listBox_FnBoolPtr(label: [:0]const u8, current_item: *c_int, items_getter: fn (?*anyopaque, c_int, [*c][*c]const u8) callconv(.C) bool, data: ?*anyopaque, items_count: c_int, height_in_items: ?c_int) bool {
-    return c.igListBox_FnBoolPtr(label, current_item, items_getter, data, items_count, height_in_items orelse -1);
+    return c.igListBox_FnBoolPtr(label.ptr, current_item, items_getter, data, items_count, height_in_items orelse -1);
 }
 
 // Widgets: Data Plotting
@@ -771,16 +773,16 @@ var PlotOption = struct {
     stride: c_int = @sizeOf(f32),
 };
 pub fn plotLines_FloatPtr(label: [:0]const u8, values: []const f32, option: PlotOption) void {
-    return c.igPlotLines_FloatPtr(label, values.ptr, @intCast(c_int, values.len), option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size, option.stride);
+    return c.igPlotLines_FloatPtr(label.ptr, values.ptr, @intCast(c_int, values.len), option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size, option.stride);
 }
 pub fn plotLines_FnFloatPtr(label: [:0]const u8, values_getter: fn (?*anyopaque, c_int) callconv(.C) f32, data: ?*anyopaque, values_count: c_int, option: PlotOption) void {
-    return c.igPlotLines_FnFloatPtr(label, values_getter, data, values_count, option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size);
+    return c.igPlotLines_FnFloatPtr(label.ptr, values_getter, data, values_count, option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size);
 }
 pub fn plotHistogram_FloatPtr(label: [:0]const u8, values: []const f32, option: PlotOption) void {
-    return c.igPlotHistogram_FloatPtr(label, values.ptr, @intCast(c_int, values.len), option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size, option.stride);
+    return c.igPlotHistogram_FloatPtr(label.ptr, values.ptr, @intCast(c_int, values.len), option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size, option.stride);
 }
 pub fn plotHistogram_FnFloatPtr(label: [:0]const u8, values_getter: fn (?*anyopaque, c_int) callconv(.C) f32, data: ?*anyopaque, values_count: c_int, option: PlotOption) void {
-    return c.igPlotHistogram_FnFloatPtr(label, values_getter, data, values_count, option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size);
+    return c.igPlotHistogram_FnFloatPtr(label.ptr, values_getter, data, values_count, option.values_offset, option.overlay_text, option.scale_min, option.scale_max, option.graph_size);
 }
 
 // Widgets: Value() Helpers.
@@ -808,7 +810,7 @@ pub const endMenuBar = c.igEndMenuBar;
 pub const beginMainMenuBar = c.igBeginMainMenuBar;
 pub const endMainMenuBar = c.igEndMainMenuBar;
 pub fn beginMenu(label: [:0]const u8, enabled: ?bool) bool {
-    return c.igBeginMenu(label, enabled orelse true);
+    return c.igBeginMenu(label.ptr, enabled orelse true);
 }
 pub const endMenu = c.igEndMenu;
 pub const MenuItemOption = struct {
@@ -817,10 +819,10 @@ pub const MenuItemOption = struct {
     enabled: bool = true,
 };
 pub fn menuItem_Bool(label: [:0]const u8, option: MenuItemOption) bool {
-    return c.igMenuItem_Bool(label, option.shortcut, option.selected, option.enabled);
+    return c.igMenuItem_Bool(label.ptr, option.shortcut, option.selected, option.enabled);
 }
 pub fn menuItem_BoolPtr(label: [:0]const u8, shortcut: [*c]const u8, p_selected: *bool, enabled: ?bool) bool {
-    return c.igMenuItem_BoolPtr(label, shortcut, p_selected, enabled orelse true);
+    return c.igMenuItem_BoolPtr(label.ptr, shortcut, p_selected, enabled orelse true);
 }
 
 // Tooltips
@@ -921,7 +923,7 @@ pub const BeginTableOption = struct {
     inner_width: f32 = 0,
 };
 pub fn beginTable(str_id: [:0]const u8, column: c_int, option: BeginTableOption) bool {
-    return c.igBeginTable(str_id, column, option.flags, option.outer_size, option.inner_width);
+    return c.igBeginTable(str_id.ptr, column, option.flags, option.outer_size, option.inner_width);
 }
 pub const endTable = c.igEndTable;
 pub fn tableNextRow(row_flags: ?c.ImGuiTableRowFlags, min_row_height: ?f32) void {
@@ -933,7 +935,7 @@ pub fn tableSetColumnIndex(column_n: c_int) bool {
 }
 
 // Tables: Headers & Columns declaration
-// - Use TableSetupColumn() to specify label, resizing policy, default width/weight, id, various other flags etc.
+// - Use TableSetupColumn() to specify label.ptr, resizing policy, default width/weight, id, various other flags etc.
 // - Use TableHeadersRow() to create a header row and automatically submit a TableHeader() for each column.
 //   Headers are required to perform: reordering, sorting, and opening the context menu.
 //   The context menu can also be made available in columns body using ImGuiTableFlags_ContextMenuInBody.
@@ -946,7 +948,7 @@ pub const TableSetupColumnOption = struct {
     user_id: c.ImGuiID = 0,
 };
 pub fn tableSetupColumn(label: [:0]const u8, option: TableSetupColumnOption) void {
-    return c.igTableSetupColumn(label, option.flags, option.init_width_or_weight, option.user_id);
+    return c.igTableSetupColumn(label.ptr, option.flags, option.init_width_or_weight, option.user_id);
 }
 pub fn tableSetupScrollFreeze(cols: c_int, rows: c_int) void {
     return c.igTableSetupScrollFreeze(cols, rows);
@@ -1009,11 +1011,11 @@ pub fn beginTabBar(str_id: [:0]const u8, flags: ?c.ImGuiTabBarFlags) bool {
 }
 pub const endTabBar = c.igEndTabBar;
 pub fn beginTabItem(label: [:0]const u8, p_open: ?*bool, flags: ?c.ImGuiTabItemFlags) bool {
-    return c.igBeginTabItem(label, p_open, flags orelse 0);
+    return c.igBeginTabItem(label.ptr, p_open, flags orelse 0);
 }
 pub const endTabItem = c.igEndTabItem;
 pub fn tabItemButton(label: [:0]const u8, flags: ?c.ImGuiTabItemFlags) bool {
-    return c.igTabItemButton(label, flags orelse 0);
+    return c.igTabItemButton(label.ptr, flags orelse 0);
 }
 pub fn setTabItemClosed(tab_or_docked_window_label: [:0]const u8) void {
     return c.igSetTabItemClosed(tab_or_docked_window_label);
@@ -1122,8 +1124,12 @@ pub fn isRectVisible_Vec2(rect_min: c.ImVec2, rect_max: c.ImVec2) bool {
 }
 pub const getTime = c.igGetTime;
 pub const getFrameCount = c.igGetFrameCount;
-pub const getBackgroundDrawList = c.igGetBackgroundDrawList_Nil;
-pub const getForegroundDrawList = c.igGetForegroundDrawList_Nil;
+pub fn getBackgroundDrawList() DrawList {
+    return .{ ._dl = c.igGetBackgroundDrawList_Nil() };
+}
+pub fn getForegroundDrawList() DrawList {
+    return .{ ._dl = c.igGetForegroundDrawList_Nil() };
+}
 pub const getDrawListSharedData = c.igGetDrawListSharedData;
 pub fn getStyleColorName(idx: c.ImGuiCol) [*c]const u8 {
     return c.igGetStyleColorName(idx);
@@ -1279,45 +1285,50 @@ pub fn memFree(ptr: ?*anyopaque) void {
     return c.igMemFree(ptr);
 }
 
-/// draw list
+// Draw list
 pub const DrawList = struct {
-    pub fn init(shared_data: *const c.ImDrawListSharedData) *c.ImDrawList {
-        return @ptrCast(*c.ImDrawList, c.ImDrawList_ImDrawList(shared_data));
-    }
-    pub fn deinit(self: *c.ImDrawList) void {
-        return c.ImDrawList_destroy(self);
-    }
+    _dl: *c.ImDrawList,
+
     pub fn pushClipRect(
-        self: *c.ImDrawList,
+        self: DrawList,
         clip_rect_min: c.ImVec2,
         clip_rect_max: c.ImVec2,
         intersect_with_current_clip_rect: bool,
     ) void {
-        return c.ImDrawList_PushClipRect(self, clip_rect_min, clip_rect_max, intersect_with_current_clip_rect);
+        return c.ImDrawList_PushClipRect(
+            self._dl,
+            clip_rect_min,
+            clip_rect_max,
+            intersect_with_current_clip_rect,
+        );
     }
-    pub fn pushClipRectFullScreen(self: *c.ImDrawList) void {
-        return c.ImDrawList_PushClipRectFullScreen(self);
+    pub fn pushClipRectFullScreen(self: DrawList) void {
+        return c.ImDrawList_PushClipRectFullScreen(self._dl);
     }
-    pub fn popClipRect(self: *c.ImDrawList) void {
-        return c.ImDrawList_PopClipRect(self);
+    pub fn popClipRect(self: DrawList) void {
+        return c.ImDrawList_PopClipRect(self._dl);
     }
-    pub fn pushTextureID(self: *c.ImDrawList, texture_id: c.ImTextureID) void {
-        return c.ImDrawList_PushTextureID(self, texture_id);
+    pub fn pushTextureID(self: DrawList, texture_id: c.ImTextureID) void {
+        return c.ImDrawList_PushTextureID(self._dl, texture_id);
     }
-    pub fn popTextureID(self: *c.ImDrawList) void {
-        return c.ImDrawList_PopTextureID(self);
+    pub fn popTextureID(self: DrawList) void {
+        return c.ImDrawList_PopTextureID(self._dl);
     }
-    pub fn getClipRectMin(pOut: [*c]c.ImVec2, self: *c.ImDrawList) void {
-        return c.ImDrawList_GetClipRectMin(pOut, self);
+    pub fn getClipRectMin(self: DrawList) c.ImVec2 {
+        var rect: c.ImVec2 = undefined;
+        c.ImDrawList_GetClipRectMin(&rect, self._dl);
+        return rect;
     }
-    pub fn getClipRectMax(pOut: [*c]c.ImVec2, self: *c.ImDrawList) void {
-        return c.ImDrawList_GetClipRectMax(pOut, self);
+    pub fn getClipRectMax(self: DrawList) c.ImVec2 {
+        var rect: c.ImVec2 = undefined;
+        c.ImDrawList_GetClipRectMax(&rect, self._dl);
+        return rect;
     }
-    pub fn addLine(self: *c.ImDrawList, p1: c.ImVec2, p2: c.ImVec2, col: c.ImU32, thickness: f32) void {
-        return c.ImDrawList_AddLine(self, p1, p2, col, thickness);
+    pub fn addLine(self: DrawList, p1: c.ImVec2, p2: c.ImVec2, col: c.ImU32, thickness: f32) void {
+        return c.ImDrawList_AddLine(self._dl, p1, p2, col, thickness);
     }
     pub fn addRect(
-        self: *c.ImDrawList,
+        self: DrawList,
         p_min: c.ImVec2,
         p_max: c.ImVec2,
         col: c.ImU32,
@@ -1325,20 +1336,20 @@ pub const DrawList = struct {
         flags: c.ImDrawFlags,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddRect(self, p_min, p_max, col, rounding, flags, thickness);
+        return c.ImDrawList_AddRect(self._dl, p_min, p_max, col, rounding, flags, thickness);
     }
     pub fn addRectFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         p_min: c.ImVec2,
         p_max: c.ImVec2,
         col: c.ImU32,
         rounding: f32,
         flags: c.ImDrawFlags,
     ) void {
-        return c.ImDrawList_AddRectFilled(self, p_min, p_max, col, rounding, flags);
+        return c.ImDrawList_AddRectFilled(self._dl, p_min, p_max, col, rounding, flags);
     }
     pub fn addRectFilledMultiColor(
-        self: *c.ImDrawList,
+        self: DrawList,
         p_min: c.ImVec2,
         p_max: c.ImVec2,
         col_upr_left: c.ImU32,
@@ -1346,10 +1357,10 @@ pub const DrawList = struct {
         col_bot_right: c.ImU32,
         col_bot_left: c.ImU32,
     ) void {
-        return c.ImDrawList_AddRectFilledMultiColor(self, p_min, p_max, col_upr_left, col_upr_right, col_bot_right, col_bot_left);
+        return c.ImDrawList_AddRectFilledMultiColor(self._dl, p_min, p_max, col_upr_left, col_upr_right, col_bot_right, col_bot_left);
     }
     pub fn addQuad(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
@@ -1357,86 +1368,86 @@ pub const DrawList = struct {
         col: c.ImU32,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddQuad(self, p1, p2, p3, p4, col, thickness);
+        return c.ImDrawList_AddQuad(self._dl, p1, p2, p3, p4, col, thickness);
     }
     pub fn addQuadFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
         p4: c.ImVec2,
         col: c.ImU32,
     ) void {
-        return c.ImDrawList_AddQuadFilled(self, p1, p2, p3, p4, col);
+        return c.ImDrawList_AddQuadFilled(self._dl, p1, p2, p3, p4, col);
     }
     pub fn addTriangle(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
         col: c.ImU32,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddTriangle(self, p1, p2, p3, col, thickness);
+        return c.ImDrawList_AddTriangle(self._dl, p1, p2, p3, col, thickness);
     }
     pub fn addTriangleFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
         col: c.ImU32,
     ) void {
-        return c.ImDrawList_AddTriangleFilled(self, p1, p2, p3, col);
+        return c.ImDrawList_AddTriangleFilled(self._dl, p1, p2, p3, col);
     }
     pub fn addCircle(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         col: c.ImU32,
         num_segments: c_int,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddCircle(self, center, radius, col, num_segments, thickness);
+        return c.ImDrawList_AddCircle(self._dl, center, radius, col, num_segments, thickness);
     }
     pub fn addCircleFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         col: c.ImU32,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_AddCircleFilled(self, center, radius, col, num_segments);
+        return c.ImDrawList_AddCircleFilled(self._dl, center, radius, col, num_segments);
     }
     pub fn addNgon(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         col: c.ImU32,
         num_segments: c_int,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddNgon(self, center, radius, col, num_segments, thickness);
+        return c.ImDrawList_AddNgon(self._dl, center, radius, col, num_segments, thickness);
     }
     pub fn addNgonFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         col: c.ImU32,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_AddNgonFilled(self, center, radius, col, num_segments);
+        return c.ImDrawList_AddNgonFilled(self._dl, center, radius, col, num_segments);
     }
     pub fn addText_Vec2(
-        self: *c.ImDrawList,
+        self: DrawList,
         pos: c.ImVec2,
         col: c.ImU32,
         text_begin: [*c]const u8,
         text_end: [*c]const u8,
     ) void {
-        return c.ImDrawList_AddText_Vec2(self, pos, col, text_begin, text_end);
+        return c.ImDrawList_AddText_Vec2(self._dl, pos, col, text_begin, text_end);
     }
     pub fn addText_FontPtr(
-        self: *c.ImDrawList,
+        self: DrawList,
         font: [*c]const c.ImFont,
         font_size: f32,
         pos: c.ImVec2,
@@ -1447,7 +1458,7 @@ pub const DrawList = struct {
         cpu_fine_clip_rect: [*c]const c.ImVec4,
     ) void {
         return c.ImDrawList_AddText_FontPtr(
-            self,
+            self._dl,
             font,
             font_size,
             pos,
@@ -1459,25 +1470,25 @@ pub const DrawList = struct {
         );
     }
     pub fn addPolyline(
-        self: *c.ImDrawList,
+        self: DrawList,
         points: [*c]const c.ImVec2,
         num_points: c_int,
         col: c.ImU32,
         flags: c.ImDrawFlags,
         thickness: f32,
     ) void {
-        return c.ImDrawList_AddPolyline(self, points, num_points, col, flags, thickness);
+        return c.ImDrawList_AddPolyline(self._dl, points, num_points, col, flags, thickness);
     }
     pub fn addConvexPolyFilled(
-        self: *c.ImDrawList,
+        self: DrawList,
         points: [*c]const c.ImVec2,
         num_points: c_int,
         col: c.ImU32,
     ) void {
-        return c.ImDrawList_AddConvexPolyFilled(self, points, num_points, col);
+        return c.ImDrawList_AddConvexPolyFilled(self._dl, points, num_points, col);
     }
     pub fn addBezierCubic(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
@@ -1486,10 +1497,10 @@ pub const DrawList = struct {
         thickness: f32,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_AddBezierCubic(self, p1, p2, p3, p4, col, thickness, num_segments);
+        return c.ImDrawList_AddBezierCubic(self._dl, p1, p2, p3, p4, col, thickness, num_segments);
     }
     pub fn addBezierQuadratic(
-        self: *c.ImDrawList,
+        self: DrawList,
         p1: c.ImVec2,
         p2: c.ImVec2,
         p3: c.ImVec2,
@@ -1497,10 +1508,10 @@ pub const DrawList = struct {
         thickness: f32,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_AddBezierQuadratic(self, p1, p2, p3, col, thickness, num_segments);
+        return c.ImDrawList_AddBezierQuadratic(self._dl, p1, p2, p3, col, thickness, num_segments);
     }
     pub fn addImage(
-        self: *c.ImDrawList,
+        self: DrawList,
         user_texture_id: c.ImTextureID,
         p_min: c.ImVec2,
         p_max: c.ImVec2,
@@ -1508,10 +1519,10 @@ pub const DrawList = struct {
         uv_max: c.ImVec2,
         col: c.ImU32,
     ) void {
-        return c.ImDrawList_AddImage(self, user_texture_id, p_min, p_max, uv_min, uv_max, col);
+        return c.ImDrawList_AddImage(self._dl, user_texture_id, p_min, p_max, uv_min, uv_max, col);
     }
     pub fn addImageQuad(
-        self: *c.ImDrawList,
+        self: DrawList,
         user_texture_id: c.ImTextureID,
         p1: c.ImVec2,
         p2: c.ImVec2,
@@ -1524,7 +1535,7 @@ pub const DrawList = struct {
         col: c.ImU32,
     ) void {
         return c.ImDrawList_AddImageQuad(
-            self,
+            self._dl,
             user_texture_id,
             p1,
             p2,
@@ -1538,7 +1549,7 @@ pub const DrawList = struct {
         );
     }
     pub fn addImageRounded(
-        self: *c.ImDrawList,
+        self: DrawList,
         user_texture_id: c.ImTextureID,
         p_min: c.ImVec2,
         p_max: c.ImVec2,
@@ -1549,7 +1560,7 @@ pub const DrawList = struct {
         flags: c.ImDrawFlags,
     ) void {
         return c.ImDrawList_AddImageRounded(
-            self,
+            self._dl,
             user_texture_id,
             p_min,
             p_max,
@@ -1560,102 +1571,102 @@ pub const DrawList = struct {
             flags,
         );
     }
-    pub fn pathClear(self: *c.ImDrawList) void {
-        return c.ImDrawList_PathClear(self);
+    pub fn pathClear(self: DrawList) void {
+        return c.ImDrawList_PathClear(self._dl);
     }
-    pub fn pathLineTo(self: *c.ImDrawList, pos: c.ImVec2) void {
-        return c.ImDrawList_PathLineTo(self, pos);
+    pub fn pathLineTo(self: DrawList, pos: c.ImVec2) void {
+        return c.ImDrawList_PathLineTo(self._dl, pos);
     }
-    pub fn pathLineToMergeDuplicate(self: *c.ImDrawList, pos: c.ImVec2) void {
-        return c.ImDrawList_PathLineToMergeDuplicate(self, pos);
+    pub fn pathLineToMergeDuplicate(self: DrawList, pos: c.ImVec2) void {
+        return c.ImDrawList_PathLineToMergeDuplicate(self._dl, pos);
     }
-    pub fn pathFillConvex(self: *c.ImDrawList, col: c.ImU32) void {
-        return c.ImDrawList_PathFillConvex(self, col);
+    pub fn pathFillConvex(self: DrawList, col: c.ImU32) void {
+        return c.ImDrawList_PathFillConvex(self._dl, col);
     }
-    pub fn pathStroke(self: *c.ImDrawList, col: c.ImU32, flags: c.ImDrawFlags, thickness: f32) void {
-        return c.ImDrawList_PathStroke(self, col, flags, thickness);
+    pub fn pathStroke(self: DrawList, col: c.ImU32, flags: c.ImDrawFlags, thickness: f32) void {
+        return c.ImDrawList_PathStroke(self._dl, col, flags, thickness);
     }
     pub fn pathArcTo(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         a_min: f32,
         a_max: f32,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_PathArcTo(self, center, radius, a_min, a_max, num_segments);
+        return c.ImDrawList_PathArcTo(self._dl, center, radius, a_min, a_max, num_segments);
     }
     pub fn pathArcToFast(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         a_min_of_12: c_int,
         a_max_of_12: c_int,
     ) void {
-        return c.ImDrawList_PathArcToFast(self, center, radius, a_min_of_12, a_max_of_12);
+        return c.ImDrawList_PathArcToFast(self._dl, center, radius, a_min_of_12, a_max_of_12);
     }
     pub fn pathBezierCubicCurveTo(
-        self: *c.ImDrawList,
+        self: DrawList,
         p2: c.ImVec2,
         p3: c.ImVec2,
         p4: c.ImVec2,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_PathBezierCubicCurveTo(self, p2, p3, p4, num_segments);
+        return c.ImDrawList_PathBezierCubicCurveTo(self._dl, p2, p3, p4, num_segments);
     }
     pub fn pathBezierQuadraticCurveTo(
-        self: *c.ImDrawList,
+        self: DrawList,
         p2: c.ImVec2,
         p3: c.ImVec2,
         num_segments: c_int,
     ) void {
-        return c.ImDrawList_PathBezierQuadraticCurveTo(self, p2, p3, num_segments);
+        return c.ImDrawList_PathBezierQuadraticCurveTo(self._dl, p2, p3, num_segments);
     }
     pub fn pathRect(
-        self: *c.ImDrawList,
+        self: DrawList,
         rect_min: c.ImVec2,
         rect_max: c.ImVec2,
         rounding: f32,
         flags: c.ImDrawFlags,
     ) void {
-        return c.ImDrawList_PathRect(self, rect_min, rect_max, rounding, flags);
+        return c.ImDrawList_PathRect(self._dl, rect_min, rect_max, rounding, flags);
     }
     pub fn addCallback(
-        self: *c.ImDrawList,
+        self: DrawList,
         callback: c.ImDrawCallback,
         callback_data: ?*anyopaque,
     ) void {
-        return c.ImDrawList_AddCallback(self, callback, callback_data);
+        return c.ImDrawList_AddCallback(self._dl, callback, callback_data);
     }
-    pub fn addDrawCmd(self: *c.ImDrawList) void {
-        return c.ImDrawList_AddDrawCmd(self);
+    pub fn addDrawCmd(self: DrawList) void {
+        return c.ImDrawList_AddDrawCmd(self._dl);
     }
-    pub fn cloneOutput(self: *c.ImDrawList) *c.ImDrawList {
-        return c.ImDrawList_CloneOutput(self);
+    pub fn cloneOutput(self: DrawList) *c.ImDrawList {
+        return c.ImDrawList_CloneOutput(self._dl);
     }
-    pub fn channelsSplit(self: *c.ImDrawList, count: c_int) void {
-        return c.ImDrawList_ChannelsSplit(self, count);
+    pub fn channelsSplit(self: DrawList, count: c_int) void {
+        return c.ImDrawList_ChannelsSplit(self._dl, count);
     }
-    pub fn channelsMerge(self: *c.ImDrawList) void {
-        return c.ImDrawList_ChannelsMerge(self);
+    pub fn channelsMerge(self: DrawList) void {
+        return c.ImDrawList_ChannelsMerge(self._dl);
     }
-    pub fn channelsSetCurrent(self: *c.ImDrawList, n: c_int) void {
-        return c.ImDrawList_ChannelsSetCurrent(self, n);
+    pub fn channelsSetCurrent(self: DrawList, n: c_int) void {
+        return c.ImDrawList_ChannelsSetCurrent(self._dl, n);
     }
-    pub fn primReserve(self: *c.ImDrawList, idx_count: c_int, vtx_count: c_int) void {
-        return c.ImDrawList_PrimReserve(self, idx_count, vtx_count);
+    pub fn primReserve(self: DrawList, idx_count: c_int, vtx_count: c_int) void {
+        return c.ImDrawList_PrimReserve(self._dl, idx_count, vtx_count);
     }
-    pub fn primUnreserve(self: *c.ImDrawList, idx_count: c_int, vtx_count: c_int) void {
-        return c.ImDrawList_PrimUnreserve(self, idx_count, vtx_count);
+    pub fn primUnreserve(self: DrawList, idx_count: c_int, vtx_count: c_int) void {
+        return c.ImDrawList_PrimUnreserve(self._dl, idx_count, vtx_count);
     }
-    pub fn primRect(self: *c.ImDrawList, a: c.ImVec2, b: c.ImVec2, col: c.ImU32) void {
-        return c.ImDrawList_PrimRect(self, a, b, col);
+    pub fn primRect(self: DrawList, a: c.ImVec2, b: c.ImVec2, col: c.ImU32) void {
+        return c.ImDrawList_PrimRect(self._dl, a, b, col);
     }
-    pub fn primRectUV(self: *c.ImDrawList, a: c.ImVec2, b: c.ImVec2, uv_a: c.ImVec2, uv_b: c.ImVec2, col: c.ImU32) void {
-        return c.ImDrawList_PrimRectUV(self, a, b, uv_a, uv_b, col);
+    pub fn primRectUV(self: DrawList, a: c.ImVec2, b: c.ImVec2, uv_a: c.ImVec2, uv_b: c.ImVec2, col: c.ImU32) void {
+        return c.ImDrawList_PrimRectUV(self._dl, a, b, uv_a, uv_b, col);
     }
     pub fn primQuadUV(
-        self: *c.ImDrawList,
+        self: DrawList,
         a: c.ImVec2,
         b: c.ImVec2,
         _c: c.ImVec2,
@@ -1666,43 +1677,43 @@ pub const DrawList = struct {
         uv_d: c.ImVec2,
         col: c.ImU32,
     ) void {
-        return c.ImDrawList_PrimQuadUV(self, a, b, _c, d, uv_a, uv_b, uv_c, uv_d, col);
+        return c.ImDrawList_PrimQuadUV(self._dl, a, b, _c, d, uv_a, uv_b, uv_c, uv_d, col);
     }
-    pub fn primWriteVtx(self: *c.ImDrawList, pos: c.ImVec2, uv: c.ImVec2, col: c.ImU32) void {
-        return c.ImDrawList_PrimWriteVtx(self, pos, uv, col);
+    pub fn primWriteVtx(self: DrawList, pos: c.ImVec2, uv: c.ImVec2, col: c.ImU32) void {
+        return c.ImDrawList_PrimWriteVtx(self._dl, pos, uv, col);
     }
-    pub fn primWriteIdx(self: *c.ImDrawList, idx: c.ImDrawIdx) void {
-        return c.ImDrawList_PrimWriteIdx(self, idx);
+    pub fn primWriteIdx(self: DrawList, idx: c.ImDrawIdx) void {
+        return c.ImDrawList_PrimWriteIdx(self._dl, idx);
     }
-    pub fn primVtx(self: *c.ImDrawList, pos: c.ImVec2, uv: c.ImVec2, col: c.ImU32) void {
-        return c.ImDrawList_PrimVtx(self, pos, uv, col);
+    pub fn primVtx(self: DrawList, pos: c.ImVec2, uv: c.ImVec2, col: c.ImU32) void {
+        return c.ImDrawList_PrimVtx(self._dl, pos, uv, col);
     }
-    pub fn resetForNewFrame(self: *c.ImDrawList) void {
-        return c.ImDrawList__ResetForNewFrame(self);
+    pub fn resetForNewFrame(self: DrawList) void {
+        return c.ImDrawList__ResetForNewFrame(self._dl);
     }
-    pub fn clearFreeMemory(self: *c.ImDrawList) void {
-        return c.ImDrawList__ClearFreeMemory(self);
+    pub fn clearFreeMemory(self: DrawList) void {
+        return c.ImDrawList__ClearFreeMemory(self._dl);
     }
-    pub fn popUnusedDrawCmd(self: *c.ImDrawList) void {
-        return c.ImDrawList__PopUnusedDrawCmd(self);
+    pub fn popUnusedDrawCmd(self: DrawList) void {
+        return c.ImDrawList__PopUnusedDrawCmd(self._dl);
     }
-    pub fn tryMergeDrawCmds(self: *c.ImDrawList) void {
-        return c.ImDrawList__TryMergeDrawCmds(self);
+    pub fn tryMergeDrawCmds(self: DrawList) void {
+        return c.ImDrawList__TryMergeDrawCmds(self._dl);
     }
-    pub fn onChangedClipRect(self: *c.ImDrawList) void {
-        return c.ImDrawList__OnChangedClipRect(self);
+    pub fn onChangedClipRect(self: DrawList) void {
+        return c.ImDrawList__OnChangedClipRect(self._dl);
     }
-    pub fn onChangedTextureID(self: *c.ImDrawList) void {
-        return c.ImDrawList__OnChangedTextureID(self);
+    pub fn onChangedTextureID(self: DrawList) void {
+        return c.ImDrawList__OnChangedTextureID(self._dl);
     }
-    pub fn onChangedVtxOffset(self: *c.ImDrawList) void {
-        return c.ImDrawList__OnChangedVtxOffset(self);
+    pub fn onChangedVtxOffset(self: DrawList) void {
+        return c.ImDrawList__OnChangedVtxOffset(self._dl);
     }
-    pub fn calcCircleAutoSegmentCount(self: *c.ImDrawList, radius: f32) c_int {
-        return c.ImDrawList__CalcCircleAutoSegmentCount(self, radius);
+    pub fn calcCircleAutoSegmentCount(self: DrawList, radius: f32) c_int {
+        return c.ImDrawList__CalcCircleAutoSegmentCount(self._dl, radius);
     }
     pub fn pathArcToFastEx(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         a_min_sample: c_int,
@@ -1710,7 +1721,7 @@ pub const DrawList = struct {
         a_step: c_int,
     ) void {
         return c.ImDrawList__PathArcToFastEx(
-            self,
+            self._dl,
             center,
             radius,
             a_min_sample,
@@ -1719,7 +1730,7 @@ pub const DrawList = struct {
         );
     }
     pub fn pathArcToN(
-        self: *c.ImDrawList,
+        self: DrawList,
         center: c.ImVec2,
         radius: f32,
         a_min: f32,
@@ -1727,7 +1738,7 @@ pub const DrawList = struct {
         num_segments: c_int,
     ) void {
         return c.ImDrawList__PathArcToN(
-            self,
+            self._dl,
             center,
             radius,
             a_min,
@@ -1737,7 +1748,7 @@ pub const DrawList = struct {
     }
 };
 
-/// ImGui Helpers
+// ImGui Helpers
 pub const helpers = struct {
     // Helpers: Hashing
     pub fn hashData(data: [*]const anyopaque, data_size: usize, seed: c.ImU32) c.ImGuiID {

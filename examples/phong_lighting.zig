@@ -87,12 +87,12 @@ fn init(ctx: *zp.Context) anyerror!void {
     // allocate framebuffer stuff
     const size = ctx.graphics.getDrawableSize();
     shadow_fb = try Framebuffer.initForShadowMapping(
-        ctx.default_allocator,
+        ctx.allocator,
         shadow_width,
         shadow_height,
     );
     scene_fb = try Framebuffer.init(
-        ctx.default_allocator,
+        ctx.allocator,
         size.w,
         size.h,
         .{},
@@ -102,7 +102,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // init gamma correction
-    gamma_correction = try GammaCorrection.init(ctx.default_allocator);
+    gamma_correction = try GammaCorrection.init(ctx.allocator);
 
     // simple renderer
     var pos = Vec3.new(0, 10, 0);
@@ -125,7 +125,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     light_renderer = SimpleRenderer.init(.{});
 
     // init lights and phong renderer
-    all_lights = std.ArrayList(light.Light).init(ctx.default_allocator);
+    all_lights = std.ArrayList(light.Light).init(ctx.allocator);
     try all_lights.append(.{
         .directional = .{
             .ambient = Vec3.fromSlice(&dir_light_ambient),
@@ -160,14 +160,14 @@ fn init(ctx: *zp.Context) anyerror!void {
     phong_renderer.applyLights(all_lights.items);
 
     // generate mesh
-    plane = try Mesh.genPlane(ctx.default_allocator, 50, 50, 20, 20);
-    cube = try Mesh.genCube(ctx.default_allocator, 1, 1, 1);
-    light_mesh = try Mesh.genSphere(ctx.default_allocator, 0.5, 20, 20);
+    plane = try Mesh.genPlane(ctx.allocator, 50, 50, 20, 20);
+    cube = try Mesh.genCube(ctx.allocator, 1, 1, 1);
+    light_mesh = try Mesh.genSphere(ctx.allocator, 0.5, 20, 20);
 
     // material init
     light_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &.{ 255, 255, 255 },
             .rgb,
             1,
@@ -178,7 +178,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     box_material = Material.init(.{
         .phong = .{
             .diffuse_map = try Texture.init2DFromFilePath(
-                ctx.default_allocator,
+                ctx.allocator,
                 "assets/container2.png",
                 false,
                 .{
@@ -186,7 +186,7 @@ fn init(ctx: *zp.Context) anyerror!void {
                 },
             ),
             .specular_map = try Texture.init2DFromFilePath(
-                ctx.default_allocator,
+                ctx.allocator,
                 "assets/container2_specular.png",
                 false,
                 .{},
@@ -198,7 +198,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     floor_material = Material.init(.{
         .phong = .{
             .diffuse_map = try Texture.init2DFromFilePath(
-                ctx.default_allocator,
+                ctx.allocator,
                 "assets/wall.jpg",
                 false,
                 .{
@@ -206,7 +206,7 @@ fn init(ctx: *zp.Context) anyerror!void {
                 },
             ),
             .specular_map = try Texture.init2DFromPixels(
-                ctx.default_allocator,
+                ctx.allocator,
                 &.{ 20, 20, 20 },
                 .rgb,
                 1,
@@ -234,7 +234,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         null,
         null,
@@ -259,7 +259,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         ));
     }
     render_data_light = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &person_view_camera,
         null,
@@ -275,14 +275,14 @@ fn init(ctx: *zp.Context) anyerror!void {
         ));
     }
     render_data_screen = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         null,
         &fb_material,
         &gamma_value,
     );
     render_pipeline_gc = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .fb = shadow_fb,
@@ -312,7 +312,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         },
     );
     render_pipeline = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .fb = shadow_fb,
@@ -407,15 +407,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

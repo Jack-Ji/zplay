@@ -21,14 +21,13 @@ var rand_gen: std.rand.DefaultPrng = undefined;
 var delta_tick: f32 = 0;
 
 fn init(ctx: *zp.Context) anyerror!void {
-    _ = ctx;
     std.log.info("game init", .{});
 
     const size = ctx.graphics.getDrawableSize();
 
     // create sprite sheet
     sprite_sheet = try SpriteSheet.fromPicturesInDir(
-        ctx.default_allocator,
+        ctx.allocator,
         "assets/images",
         size.w,
         size.h,
@@ -36,17 +35,17 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .accept_jpg = false },
     );
     characters = try std.ArrayList(Actor).initCapacity(
-        ctx.default_allocator,
+        ctx.allocator,
         1000000,
     );
     sprite_batch = try SpriteBatch.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &ctx.graphics,
         10,
         1000000,
     );
     all_names = try std.ArrayList([]const u8).initCapacity(
-        ctx.default_allocator,
+        ctx.allocator,
         10000,
     );
     var it = sprite_sheet.search_tree.iterator();
@@ -61,46 +60,37 @@ fn loop(ctx: *zp.Context) anyerror!void {
 
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
-                }
-            },
-            .mouse_event => |me| {
-                switch (me.data) {
-                    .button => |click| {
-                        if (click.btn != .left) {
-                            continue;
-                        }
-                        var rd = rand_gen.random();
-                        if (click.clicked) {
-                            const pos = Sprite.Point{
-                                .x = @intToFloat(f32, click.x),
-                                .y = @intToFloat(f32, click.y),
-                            };
-                            var i: u32 = 0;
-                            while (i < 1000) : (i += 1) {
-                                const index = rd.uintLessThan(usize, all_names.items.len);
-                                const angle = rd.float(f32) * 2 * std.math.pi;
-                                const name = all_names.items[index];
-                                try characters.append(.{
-                                    .sprite = try sprite_sheet.createSprite(name),
-                                    .pos = pos,
-                                    .velocity = .{
-                                        .x = 5 * @cos(angle),
-                                        .y = 5 * @sin(angle),
-                                    },
-                                });
-                            }
-                        }
-                    },
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
                     else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .mouse_button_up => |click| {
+                if (click.button != .left) {
+                    continue;
+                }
+                var rd = rand_gen.random();
+                const pos = Sprite.Point{
+                    .x = @intToFloat(f32, click.x),
+                    .y = @intToFloat(f32, click.y),
+                };
+                var i: u32 = 0;
+                while (i < 1000) : (i += 1) {
+                    const index = rd.uintLessThan(usize, all_names.items.len);
+                    const angle = rd.float(f32) * 2 * std.math.pi;
+                    const name = all_names.items[index];
+                    try characters.append(.{
+                        .sprite = try sprite_sheet.createSprite(name),
+                        .pos = pos,
+                        .velocity = .{
+                            .x = 5 * @cos(angle),
+                            .y = 5 * @sin(angle),
+                        },
+                    });
+                }
+            },
+            .quit => ctx.kill(),
             else => {},
         }
     }

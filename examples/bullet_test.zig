@@ -56,7 +56,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // allocate framebuffer stuff
     shadow_fb = try Framebuffer.initForShadowMapping(
-        ctx.default_allocator,
+        ctx.allocator,
         shadow_width,
         shadow_height,
     );
@@ -108,18 +108,18 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // init physics world
-    physics_world = try BulletWorld.init(ctx.default_allocator, -9.8);
-    try physics_world.enableDebugDraw(ctx.default_allocator);
-    all_actors = try std.ArrayList(Actor).initCapacity(ctx.default_allocator, 6);
+    physics_world = try BulletWorld.init(ctx.allocator, -9.8);
+    try physics_world.enableDebugDraw(ctx.allocator);
+    all_actors = try std.ArrayList(Actor).initCapacity(ctx.allocator, 6);
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.zero(),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/world.gltf",
             false,
             try Texture.init2DFromPixels(
-                ctx.default_allocator,
+                ctx.allocator,
                 &.{ 128, 128, 128 },
                 .rgb,
                 1,
@@ -131,10 +131,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .friction = 0.15 },
     );
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.new(-5, 15, -2),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/capsule.gltf",
             false,
             null,
@@ -147,10 +147,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.new(-5, 11, -2),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/cylinder.gltf",
             false,
             null,
@@ -167,10 +167,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.new(-5, 8, -2),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/cube.gltf",
             false,
             null,
@@ -183,10 +183,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.new(-5, 6, -2),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/cone.gltf",
             false,
             null,
@@ -199,10 +199,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{ .mass = 10 },
     );
     addActor(
-        ctx.default_allocator,
+        ctx.allocator,
         Vec3.new(-5, 3.5, -2),
         try Model.fromGLTF(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/sphere.gltf",
             false,
             null,
@@ -218,7 +218,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // init render data annd pipeline
     color_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &.{ 0, 255, 0 },
             .rgb,
             1,
@@ -227,21 +227,21 @@ fn init(ctx: *zp.Context) anyerror!void {
         ),
     });
     render_data_shadow = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &light_view_camera,
         null,
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &person_view_camera,
         null,
         null,
     );
     render_data_outlined = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &person_view_camera,
         null,
@@ -265,7 +265,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         }
     }
     render_pipeline = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .fb = shadow_fb,
@@ -391,15 +391,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
 
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

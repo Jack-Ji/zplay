@@ -174,61 +174,60 @@ fn postBodyFree(body: ?*cp.Body, user_data: ?*anyopaque) callconv(.C) void {
 }
 
 /// add object to world
+pub const BodyProperty = union(enum) {
+    dynamic: struct {
+        position: cp.Vect,
+        velocity: cp.Vect = cp.vzero,
+        angular_velocity: f32 = 0,
+    },
+    kinematic: struct {
+        position: cp.Vect,
+        velocity: cp.Vect = cp.vzero,
+        angular_velocity: f32 = 0,
+    },
+    static: struct {
+        position: cp.Vect,
+    },
+    global_static: void,
+};
+pub const ShapeProperty = union(enum) {
+    pub const Weight = union(enum) {
+        mass: f32,
+        density: f32,
+    };
+    pub const Physics = struct {
+        weight: Weight = .{ .mass = 1 },
+        elasticity: f32 = 0.1,
+        friction: f32 = 0.7,
+        is_sensor: bool = false,
+    };
+
+    segment: struct {
+        a: cp.Vect,
+        b: cp.Vect,
+        radius: f32 = 0,
+        physics: Physics = .{},
+    },
+    box: struct {
+        width: f32,
+        height: f32,
+        radius: f32 = 0,
+        physics: Physics = .{},
+    },
+    circle: struct {
+        radius: f32,
+        offset: cp.Vect = cp.vzero,
+        physics: Physics = .{},
+    },
+    polygon: struct {
+        verts: []const cp.Vect,
+        transform: cp.Transform = cp.transformIdentity,
+        radius: f32 = 0,
+        physics: Physics = .{},
+    },
+};
 pub const ObjectOption = struct {
-    pub const BodyProperty = union(enum) {
-        dynamic: struct {
-            position: cp.Vect,
-            velocity: cp.Vect = cp.vzero,
-            angular_velocity: f32 = 0,
-        },
-        kinematic: struct {
-            position: cp.Vect,
-            velocity: cp.Vect = cp.vzero,
-            angular_velocity: f32 = 0,
-        },
-        static: struct {
-            position: cp.Vect,
-        },
-        global_static: u8,
-    };
-    pub const ShapeProperty = union(enum) {
-        pub const Weight = union(enum) {
-            mass: f32,
-            density: f32,
-        };
-        pub const Physics = struct {
-            weight: Weight = .{ .mass = 1 },
-            elasticity: f32 = 0.1,
-            friction: f32 = 0.7,
-            is_sensor: bool = false,
-        };
-
-        segment: struct {
-            a: cp.Vect,
-            b: cp.Vect,
-            radius: f32 = 0,
-            physics: Physics = .{},
-        },
-        box: struct {
-            width: f32,
-            height: f32,
-            radius: f32 = 0,
-            physics: Physics = .{},
-        },
-        circle: struct {
-            radius: f32,
-            offset: cp.Vect = cp.vzero,
-            physics: Physics = .{},
-        },
-        polygon: struct {
-            verts: []const cp.Vect,
-            transform: cp.Transform = cp.transformIdentity,
-            radius: f32 = 0,
-            physics: Physics = .{},
-        },
-    };
-
-    body: BodyProperty = .{.global_static},
+    body: BodyProperty = BodyProperty.global_static,
     shapes: []const ShapeProperty,
     filter: Filter = .{},
     never_rotate: bool = false,
@@ -349,7 +348,7 @@ pub fn addObject(self: *Self, opt: ObjectOption) !u32 {
     return @intCast(u32, self.objects.items.len - 1);
 }
 
-fn initPhysicsOfShape(shape: *cp.Shape, phy: ObjectOption.ShapeProperty.Physics) void {
+fn initPhysicsOfShape(shape: *cp.Shape, phy: ShapeProperty.Physics) void {
     switch (phy.weight) {
         .mass => |m| cp.shapeSetMass(shape, m),
         .density => |d| cp.shapeSetDensity(shape, d),

@@ -20,13 +20,12 @@ var material1: Material = undefined;
 var material2: Material = undefined;
 
 fn init(ctx: *zp.Context) anyerror!void {
-    _ = ctx;
     std.log.info("game init", .{});
 
     const size = ctx.graphics.getDrawableSize();
 
     // create font atlas
-    var font = try Font.init(ctx.default_allocator, "assets/msyh.ttf");
+    var font = try Font.init(ctx.allocator, "assets/msyh.ttf");
     defer font.deinit();
     font_atlas1 = try font.createAtlas(64, &Font.CodepointRanges.chineseCommon, null);
     font_atlas2 = try font.createAtlas(30, &Font.CodepointRanges.chineseCommon, null);
@@ -35,7 +34,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     font_renderer = FontRenderer.init();
 
     // vertex array
-    var vattrib = std.ArrayList(f32).init(ctx.default_allocator);
+    var vattrib = std.ArrayList(f32).init(ctx.allocator);
     defer vattrib.deinit();
     _ = try font_atlas1.appendDrawDataFromUTF8String(
         "你好！ABCDEFGHIJKL abcdefghijkl",
@@ -54,7 +53,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         &vattrib,
     );
     const vcount1 = @intCast(u32, vattrib.items.len) / FontRenderer.float_num_of_vertex_attrib;
-    vertex_array1 = VertexArray.init(ctx.default_allocator, 1);
+    vertex_array1 = VertexArray.init(ctx.allocator, 1);
     FontRenderer.setupVertexArray(vertex_array1);
     vertex_array1.vbos[0].allocInitData(f32, vattrib.items, .static_draw);
 
@@ -84,7 +83,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         &vattrib,
     );
     const vcount2 = @intCast(u32, vattrib.items.len) / FontRenderer.float_num_of_vertex_attrib;
-    vertex_array2 = VertexArray.init(ctx.default_allocator, 1);
+    vertex_array2 = VertexArray.init(ctx.allocator, 1);
     FontRenderer.setupVertexArray(vertex_array2);
     vertex_array2.vbos[0].allocInitData(f32, vattrib.items, .static_draw);
 
@@ -98,7 +97,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // compose renderer's input
     render_data = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]Renderer.Input.VertexData{
             .{
                 .element_draw = false,
@@ -122,15 +121,13 @@ fn init(ctx: *zp.Context) anyerror!void {
 fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

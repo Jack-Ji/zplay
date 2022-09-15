@@ -19,7 +19,6 @@ var vertex_array: VertexArray = undefined;
 var material: Material = undefined;
 
 fn init(ctx: *zp.Context) anyerror!void {
-    _ = ctx;
     std.log.info("game init", .{});
 
     // create renderer
@@ -46,7 +45,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         0.5,  -0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
         0.0,  0.5,  0.0, 0.0, 0.0, 1.0, 1.0,
     };
-    vertex_array = VertexArray.init(ctx.default_allocator, 5);
+    vertex_array = VertexArray.init(ctx.allocator, 5);
     vertex_array.use();
     defer vertex_array.disuse();
     vertex_array.vbos[0].allocInitData(f32, &vertices, .static_draw);
@@ -56,7 +55,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // create material
     material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &.{
                 0,   0,   0,
                 0,   255, 0,
@@ -72,7 +71,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // compose renderer's input
     render_data = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]Renderer.Input.VertexData{.{
             .element_draw = false,
             .vertex_array = vertex_array,
@@ -88,8 +87,8 @@ fn init(ctx: *zp.Context) anyerror!void {
 fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .window_event => |we| {
-                switch (we.data) {
+            .window => |we| {
+                switch (we.type) {
                     .resized => {
                         var size = ctx.graphics.getDrawableSize();
                         ctx.graphics.setViewport(.{ .w = size.w, .h = size.h });
@@ -97,15 +96,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
                     else => {},
                 }
             },
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

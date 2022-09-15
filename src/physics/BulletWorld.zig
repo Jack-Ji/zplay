@@ -64,7 +64,7 @@ pub fn deinit(self: *Self) void {
 /// enable physics debug rendering
 pub fn enableDebugDraw(self: *Self, allocator: std.mem.Allocator) !void {
     self.debug = try PhysicsDebug.init(allocator, 128000);
-    bt.worldDebugSetCallbacks(self.world, &.{
+    bt.worldDebugSetCallbacks(self.world, &bt.c.CbtDebugDrawCallbacks{
         .drawLine1 = PhysicsDebug.drawLine1Callback,
         .drawLine2 = PhysicsDebug.drawLine2Callback,
         .drawContactPoint = PhysicsDebug.drawContactPointCallback,

@@ -12,7 +12,7 @@ const MAX_VBO_NUM = 8;
 id: gl.GLuint = undefined,
 
 /// buffer objects
-vbos: [MAX_VBO_NUM]*Buffer = [_]*Buffer{null} ** MAX_VBO_NUM,
+vbos: [MAX_VBO_NUM]*Buffer = [_]*Buffer{undefined} ** MAX_VBO_NUM,
 vbo_num: u32 = undefined,
 borrowed: bool = undefined,
 
@@ -36,7 +36,7 @@ pub fn init(allocator: std.mem.Allocator, vbo_num: u32) Self {
 }
 
 /// init vertex array with given buffers
-/// NOTE: VertexArray will consider these buffers borrowed, thus 
+/// NOTE: VertexArray will consider these buffers borrowed, thus
 /// buffers won't be destroyed during deinitialize.
 pub fn fromBuffers(buffers: []*Buffer) Self {
     assert(buffers.len > 0 and buffers.len <= MAX_VBO_NUM);

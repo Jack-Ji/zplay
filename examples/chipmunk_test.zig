@@ -11,11 +11,11 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     const size = ctx.graphics.getDrawableSize();
 
-    world = try CPWorld.init(ctx.default_allocator, .{
+    world = try CPWorld.init(ctx.allocator, .{
         .gravity = .{ .x = 0, .y = 600 },
     });
 
-    const dynamic_body: CPWorld.ObjectOption.BodyProperty = .{
+    const dynamic_body: CPWorld.BodyProperty = .{
         .dynamic = .{
             .position = .{
                 .x = @intToFloat(f32, size.w) / 2,
@@ -23,7 +23,7 @@ fn init(ctx: *zp.Context) anyerror!void {
             },
         },
     };
-    const physics: CPWorld.ObjectOption.ShapeProperty.Physics = .{
+    const physics: CPWorld.ShapeProperty.Physics = .{
         .weight = .{ .mass = 1 },
         .elasticity = 0.5,
     };
@@ -75,10 +75,8 @@ fn init(ctx: *zp.Context) anyerror!void {
         }
     }
     _ = try world.addObject(.{
-        .body = .{
-            .global_static = 1,
-        },
-        .shapes = &[_]CPWorld.ObjectOption.ShapeProperty{
+        .body = CPWorld.BodyProperty.global_static,
+        .shapes = &[_]CPWorld.ShapeProperty{
             .{
                 .segment = .{
                     .a = .{ .x = 50, .y = 200 },
@@ -133,15 +131,13 @@ fn init(ctx: *zp.Context) anyerror!void {
 fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

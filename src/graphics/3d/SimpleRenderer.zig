@@ -148,7 +148,7 @@ pub fn draw(self: *Self, ctx: *Context, input: Renderer.Input) anyerror!void {
     }
 
     // render vertex data one by one
-    var current_material: *Material = undefined;
+    var current_material: *const Material = undefined;
     for (input.vds.?.items) |vd| {
         if (!vd.valid) continue;
         vd.vertex_array.use();

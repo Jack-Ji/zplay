@@ -21,14 +21,14 @@ pub const cgltf_result_legacy_gltf: c_int = 9;
 pub const enum_cgltf_result = c_uint;
 pub const cgltf_result = enum_cgltf_result;
 pub const struct_cgltf_memory_options = extern struct {
-    alloc: ?fn (?*anyopaque, cgltf_size) callconv(.C) ?*anyopaque,
-    free: ?fn (?*anyopaque, ?*anyopaque) callconv(.C) void,
+    alloc: ?*const fn (?*anyopaque, cgltf_size) callconv(.C) ?*anyopaque,
+    free: ?*const fn (?*anyopaque, ?*anyopaque) callconv(.C) void,
     user_data: ?*anyopaque,
 };
 pub const cgltf_memory_options = struct_cgltf_memory_options;
 pub const struct_cgltf_file_options = extern struct {
-    read: ?fn ([*c]const struct_cgltf_memory_options, [*c]const struct_cgltf_file_options, [*c]const u8, [*c]cgltf_size, [*c]?*anyopaque) callconv(.C) cgltf_result,
-    release: ?fn ([*c]const struct_cgltf_memory_options, [*c]const struct_cgltf_file_options, ?*anyopaque) callconv(.C) void,
+    read: ?*const fn ([*c]const struct_cgltf_memory_options, [*c]const struct_cgltf_file_options, [*c]const u8, [*c]cgltf_size, [*c]?*anyopaque) callconv(.C) cgltf_result,
+    release: ?*const fn ([*c]const struct_cgltf_memory_options, [*c]const struct_cgltf_file_options, ?*anyopaque) callconv(.C) void,
     user_data: ?*anyopaque,
 };
 pub const cgltf_file_options = struct_cgltf_file_options;

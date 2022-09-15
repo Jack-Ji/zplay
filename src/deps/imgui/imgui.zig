@@ -1,7 +1,6 @@
 const std = @import("std");
 const assert = std.debug.assert;
 const zp = @import("../../zplay.zig");
-const event = zp.event;
 const sdl = zp.deps.sdl;
 const sdl_impl = @import("sdl_impl.zig");
 pub const c = @import("c.zig");
@@ -34,7 +33,7 @@ var nodes_ctx: ?*ext.nodes.ImNodesContext = undefined;
 /// initialize sdl2 and opengl3 backend
 pub fn init(ctx: *zp.Context) !void {
     _ = c.igCreateContext(null);
-    try sdl_impl.init(ctx.window.ptr);
+    try sdl_impl.init(ctx);
     if (!_ImGui_ImplOpenGL3_Init(null)) {
         return error.InitOpenGLFailed;
     }
@@ -69,7 +68,7 @@ pub fn deinit() void {
 }
 
 /// process i/o event
-pub fn processEvent(e: event.Event) bool {
+pub fn processEvent(e: sdl.Event) bool {
     assert(initialized);
     return sdl_impl.processEvent(e);
 }

@@ -33,8 +33,8 @@ pub fn openFileDialog(
     var out_path: [*c]u8 = null;
 
     const result = c.NFD_OpenDialog(
-        filter orelse null,
-        default_path orelse null,
+        if (filter) |f| f.ptr else null,
+        if (default_path) |p| p.ptr else null,
         &out_path,
     );
 
@@ -56,8 +56,8 @@ pub fn saveFileDialog(
     var out_path: [*c]u8 = null;
 
     const result = c.NFD_SaveDialog(
-        filter orelse null,
-        default_path orelse null,
+        if (filter) |f| f.ptr else null,
+        if (default_path) |p| p.ptr else null,
         &out_path,
     );
 
@@ -99,8 +99,8 @@ pub fn openMultipleFileDialog(
     var out_pathset: c.nfdpathset_t = undefined;
 
     const result = c.NFD_OpenDialogMultiple(
-        filter orelse null,
-        default_path orelse null,
+        if (filter) |f| f.ptr else null,
+        if (default_path) |p| p.ptr else null,
         &out_pathset,
     );
 
@@ -116,7 +116,7 @@ pub fn openDirectoryDialog(default_path: ?[:0]const u8) Error!?FilePath {
     var out_path: [*c]u8 = null;
 
     const result = c.NFD_PickFolder(
-        default_path orelse null,
+        if (default_path) |p| p.ptr else null,
         &out_path,
     );
 

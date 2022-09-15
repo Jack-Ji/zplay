@@ -58,10 +58,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
 
-    skybox = SkyboxRenderer.init(ctx.default_allocator);
+    skybox = SkyboxRenderer.init(ctx.allocator);
     simple_renderer = SimpleRenderer.init(.{});
 
-    pipline = try RenderPipeline.init(ctx.default_allocator, &[_]RenderPipeline.RenderPass{
+    pipline = try RenderPipeline.init(ctx.allocator, &[_]RenderPipeline.RenderPass{
         .{
             .beforeFn = beforeSceneRendering,
             .rd = simple_renderer.renderer(),
@@ -81,34 +81,30 @@ fn loop(ctx: *zp.Context) anyerror!void {
     global_tick = @floatCast(f32, ctx.tick);
 
     while (ctx.pollEvent()) |e| {
-        if (e == .mouse_event and dig.getIO().*.WantCaptureMouse) {
+        if ((e == .mouse_motion or e == .mouse_button_up or
+            e == .mouse_button_down or e == .mouse_wheel) and
+            dig.getIO().*.WantCaptureMouse)
+        {
             _ = dig.processEvent(e);
             continue;
         }
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
-                }
-            },
-            .mouse_event => |me| {
-                switch (me.data) {
-                    .wheel => |scroll| {
-                        camera.frustrum.perspective.fov -= @intToFloat(f32, scroll.scroll_y);
-                        if (camera.frustrum.perspective.fov < 1) {
-                            camera.frustrum.perspective.fov = 1;
-                        }
-                        if (camera.frustrum.perspective.fov > 45) {
-                            camera.frustrum.perspective.fov = 45;
-                        }
-                    },
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
                     else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .mouse_wheel => |me| {
+                camera.frustrum.perspective.fov -= @intToFloat(f32, me.delta_y);
+                if (camera.frustrum.perspective.fov < 1) {
+                    camera.frustrum.perspective.fov = 1;
+                }
+                if (camera.frustrum.perspective.fov > 45) {
+                    camera.frustrum.perspective.fov = 45;
+                }
+            },
+            .quit => ctx.kill(),
             else => {},
         }
     }
@@ -133,11 +129,10 @@ fn loop(ctx: *zp.Context) anyerror!void {
                 dig.c.ImGuiWindowFlags_NoResize |
                 dig.c.ImGuiWindowFlags_AlwaysAutoResize,
         )) {
-            var buf: [32]u8 = undefined;
-            dig.text(try std.fmt.bufPrintZ(&buf, "FPS: {d:.2}", .{dig.getIO().*.Framerate}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "ms/frame: {d:.2}", .{ctx.delta_tick * 1000}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "Total Vertices: {d}", .{total_vertices}));
-            dig.text(try std.fmt.bufPrintZ(&buf, "Total Meshes: {d}", .{total_meshes}));
+            dig.ztext("FPS: {d:.2}", .{dig.getIO().*.Framerate});
+            dig.ztext("ms/frame: {d:.2}", .{ctx.delta_tick * 1000});
+            dig.ztext("Total Vertices: {d}", .{total_vertices});
+            dig.ztext("Total Meshes: {d}", .{total_meshes});
             dig.separator();
             if (dig.checkbox("wireframe", &wireframe_mode)) {
                 ctx.graphics.setPolygonMode(if (wireframe_mode) .line else .fill);
@@ -219,7 +214,7 @@ fn loadScene(ctx: *zp.Context) !void {
     // allocate skybox
     skybox_material = Material.init(.{
         .single_cubemap = try Texture.initCubeFromFilePaths(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/skybox/right.jpg",
             "assets/skybox/left.jpg",
             "assets/skybox/top.jpg",
@@ -233,9 +228,9 @@ fn loadScene(ctx: *zp.Context) !void {
     // load models
     total_vertices = 0;
     total_meshes = 0;
-    dog = try Model.fromGLTF(ctx.default_allocator, "assets/dog.gltf", merge_meshes, null);
-    girl = try Model.fromGLTF(ctx.default_allocator, "assets/girl.glb", merge_meshes, null);
-    helmet = try Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null);
+    dog = try Model.fromGLTF(ctx.allocator, "assets/dog.gltf", merge_meshes, null);
+    girl = try Model.fromGLTF(ctx.allocator, "assets/girl.glb", merge_meshes, null);
+    helmet = try Model.fromGLTF(ctx.allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", merge_meshes, null);
     for (dog.meshes.items) |m| {
         total_vertices += @intCast(u32, m.positions.items.len);
         total_meshes += 1;
@@ -251,7 +246,7 @@ fn loadScene(ctx: *zp.Context) !void {
 
     // init scene
     render_data_scene = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         null,

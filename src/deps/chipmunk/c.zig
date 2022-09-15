@@ -123,7 +123,7 @@ pub extern fn _wmakepath_s(_PathResult: [*c]wchar_t, _SizeInWords: usize, _Drive
 pub extern fn _wputenv_s(_Name: [*c]const wchar_t, _Value: [*c]const wchar_t) errno_t;
 pub extern fn _wsearchenv_s(_Filename: [*c]const wchar_t, _EnvVar: [*c]const wchar_t, _ResultPath: [*c]wchar_t, _SizeInWords: usize) errno_t;
 pub extern fn _wsplitpath_s(_FullPath: [*c]const wchar_t, _Drive: [*c]wchar_t, _DriveSizeInWords: usize, _Dir: [*c]wchar_t, _DirSizeInWords: usize, _Filename: [*c]wchar_t, _FilenameSizeInWords: usize, _Ext: [*c]wchar_t, _ExtSizeInWords: usize) errno_t;
-pub const _onexit_t = ?fn () callconv(.C) c_int;
+pub const _onexit_t = ?*const fn () callconv(.C) c_int;
 pub const struct__div_t = extern struct {
     quot: c_int,
     rem: c_int,
@@ -151,10 +151,10 @@ pub const _LDBL12 = extern struct {
 };
 pub extern var __imp___mb_cur_max: [*c]c_int;
 pub extern fn ___mb_cur_max_func() c_int;
-pub const _purecall_handler = ?fn () callconv(.C) void;
+pub const _purecall_handler = ?*const fn () callconv(.C) void;
 pub extern fn _set_purecall_handler(_Handler: _purecall_handler) _purecall_handler;
 pub extern fn _get_purecall_handler() _purecall_handler;
-pub const _invalid_parameter_handler = ?fn ([*c]const wchar_t, [*c]const wchar_t, [*c]const wchar_t, c_uint, usize) callconv(.C) void;
+pub const _invalid_parameter_handler = ?*const fn ([*c]const wchar_t, [*c]const wchar_t, [*c]const wchar_t, c_uint, usize) callconv(.C) void;
 pub extern fn _set_invalid_parameter_handler(_Handler: _invalid_parameter_handler) _invalid_parameter_handler;
 pub extern fn _get_invalid_parameter_handler() _invalid_parameter_handler;
 pub extern fn _errno() [*c]c_int;
@@ -200,15 +200,15 @@ pub extern fn abs(_X: c_int) c_int;
 pub extern fn labs(_X: c_long) c_long; // D:\DevTools\zig\lib\libc\include\any-windows-any\stdlib.h:421:12: warning: TODO implement function '__builtin_llabs' in std.zig.c_builtins
 // D:\DevTools\zig\lib\libc\include\any-windows-any\stdlib.h:420:41: warning: unable to translate function, demoted to extern
 pub extern fn _abs64(arg_x: c_longlong) c_longlong;
-pub extern fn atexit(?fn () callconv(.C) void) c_int;
+pub extern fn atexit(?*const fn () callconv(.C) void) c_int;
 pub extern fn atof(_String: [*c]const u8) f64;
 pub extern fn _atof_l(_String: [*c]const u8, _Locale: _locale_t) f64;
 pub extern fn atoi(_Str: [*c]const u8) c_int;
 pub extern fn _atoi_l(_Str: [*c]const u8, _Locale: _locale_t) c_int;
 pub extern fn atol(_Str: [*c]const u8) c_long;
 pub extern fn _atol_l(_Str: [*c]const u8, _Locale: _locale_t) c_long;
-pub extern fn bsearch(_Key: ?*const anyopaque, _Base: ?*const anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?fn (?*const anyopaque, ?*const anyopaque) callconv(.C) c_int) ?*anyopaque;
-pub extern fn qsort(_Base: ?*anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?fn (?*const anyopaque, ?*const anyopaque) callconv(.C) c_int) void;
+pub extern fn bsearch(_Key: ?*const anyopaque, _Base: ?*const anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?*const fn (?*const anyopaque, ?*const anyopaque) callconv(.C) c_int) ?*anyopaque;
+pub extern fn qsort(_Base: ?*anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?*const fn (?*const anyopaque, ?*const anyopaque) callconv(.C) c_int) void;
 pub extern fn _byteswap_ushort(_Short: c_ushort) c_ushort;
 pub extern fn _byteswap_ulong(_Long: c_ulong) c_ulong;
 pub extern fn _byteswap_uint64(_Int64: c_ulonglong) c_ulonglong;
@@ -399,7 +399,7 @@ pub fn ulltow(arg__n: c_ulonglong, arg__w: [*c]wchar_t, arg__i: c_int) callconv(
     var _i = arg__i;
     return _ui64tow(_n, _w, _i);
 }
-pub extern fn bsearch_s(_Key: ?*const anyopaque, _Base: ?*const anyopaque, _NumOfElements: rsize_t, _SizeOfElements: rsize_t, _PtFuncCompare: ?fn (?*anyopaque, ?*const anyopaque, ?*const anyopaque) callconv(.C) c_int, _Context: ?*anyopaque) ?*anyopaque;
+pub extern fn bsearch_s(_Key: ?*const anyopaque, _Base: ?*const anyopaque, _NumOfElements: rsize_t, _SizeOfElements: rsize_t, _PtFuncCompare: ?*const fn (?*anyopaque, ?*const anyopaque, ?*const anyopaque) callconv(.C) c_int, _Context: ?*anyopaque) ?*anyopaque;
 pub extern fn _dupenv_s(_PBuffer: [*c][*c]u8, _PBufferSizeInBytes: [*c]usize, _VarName: [*c]const u8) errno_t;
 pub extern fn getenv_s(_ReturnSize: [*c]usize, _DstBuf: [*c]u8, _DstSize: rsize_t, _VarName: [*c]const u8) errno_t;
 pub extern fn _itoa_s(_Value: c_int, _DstBuf: [*c]u8, _Size: usize, _Radix: c_int) errno_t;
@@ -420,7 +420,7 @@ pub extern fn _makepath_s(_PathResult: [*c]u8, _Size: usize, _Drive: [*c]const u
 pub extern fn _putenv_s(_Name: [*c]const u8, _Value: [*c]const u8) errno_t;
 pub extern fn _searchenv_s(_Filename: [*c]const u8, _EnvVar: [*c]const u8, _ResultPath: [*c]u8, _SizeInBytes: usize) errno_t;
 pub extern fn _splitpath_s(_FullPath: [*c]const u8, _Drive: [*c]u8, _DriveSize: usize, _Dir: [*c]u8, _DirSize: usize, _Filename: [*c]u8, _FilenameSize: usize, _Ext: [*c]u8, _ExtSize: usize) errno_t;
-pub extern fn qsort_s(_Base: ?*anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?fn (?*anyopaque, ?*const anyopaque, ?*const anyopaque) callconv(.C) c_int, _Context: ?*anyopaque) void;
+pub extern fn qsort_s(_Base: ?*anyopaque, _NumOfElements: usize, _SizeOfElements: usize, _PtFuncCompare: ?*const fn (?*anyopaque, ?*const anyopaque, ?*const anyopaque) callconv(.C) c_int, _Context: ?*anyopaque) void;
 pub const struct__heapinfo = extern struct {
     _pentry: [*c]c_int,
     _size: usize,
@@ -514,8 +514,8 @@ pub const union___mingw_ldbl_type_t = extern union {
 pub const __mingw_ldbl_type_t = union___mingw_ldbl_type_t;
 pub extern var __imp__HUGE: [*c]f64;
 pub extern fn __mingw_raise_matherr(typ: c_int, name: [*c]const u8, a1: f64, a2: f64, rslt: f64) void;
-pub extern fn __mingw_setusermatherr(?fn ([*c]struct__exception) callconv(.C) c_int) void;
-pub extern fn __setusermatherr(?fn ([*c]struct__exception) callconv(.C) c_int) void;
+pub extern fn __mingw_setusermatherr(?*const fn ([*c]struct__exception) callconv(.C) c_int) void;
+pub extern fn __setusermatherr(?*const fn ([*c]struct__exception) callconv(.C) c_int) void;
 pub extern fn sin(_X: f64) f64;
 pub extern fn cos(_X: f64) f64;
 pub extern fn tan(_X: f64) f64;
@@ -1004,10 +1004,10 @@ pub const struct_cpArbiter = opaque {};
 pub const cpArbiter = struct_cpArbiter;
 pub const struct_cpSpace = opaque {};
 pub const cpSpace = struct_cpSpace;
-pub const cpCollisionBeginFunc = ?fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) cpBool;
-pub const cpCollisionPreSolveFunc = ?fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) cpBool;
-pub const cpCollisionPostSolveFunc = ?fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) void;
-pub const cpCollisionSeparateFunc = ?fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) void;
+pub const cpCollisionBeginFunc = ?*const fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) cpBool;
+pub const cpCollisionPreSolveFunc = ?*const fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) cpBool;
+pub const cpCollisionPostSolveFunc = ?*const fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) void;
+pub const cpCollisionSeparateFunc = ?*const fn (?*cpArbiter, ?*cpSpace, cpDataPointer) callconv(.C) void;
 pub const struct_cpCollisionHandler = extern struct {
     typeA: cpCollisionType,
     typeB: cpCollisionType,
@@ -1375,10 +1375,10 @@ pub fn cpTransformAxialScale(arg_axis: cpVect, arg_pivot: cpVect, arg_scale: cpF
     var B: cpFloat = @floatCast(cpFloat, @floatCast(f64, cpvdot(axis, pivot)) * (1.0 - @floatCast(f64, scale)));
     return cpTransformNewTranspose(((scale * axis.x) * axis.x) + (axis.y * axis.y), A, axis.x * B, A, (axis.x * axis.x) + ((scale * axis.y) * axis.y), axis.y * B);
 }
-pub const cpSpatialIndexBBFunc = ?fn (?*anyopaque) callconv(.C) cpBB;
-pub const cpSpatialIndexIteratorFunc = ?fn (?*anyopaque, ?*anyopaque) callconv(.C) void;
-pub const cpSpatialIndexQueryFunc = ?fn (?*anyopaque, ?*anyopaque, cpCollisionID, ?*anyopaque) callconv(.C) cpCollisionID;
-pub const cpSpatialIndexSegmentQueryFunc = ?fn (?*anyopaque, ?*anyopaque, ?*anyopaque) callconv(.C) cpFloat;
+pub const cpSpatialIndexBBFunc = ?*const fn (?*anyopaque) callconv(.C) cpBB;
+pub const cpSpatialIndexIteratorFunc = ?*const fn (?*anyopaque, ?*anyopaque) callconv(.C) void;
+pub const cpSpatialIndexQueryFunc = ?*const fn (?*anyopaque, ?*anyopaque, cpCollisionID, ?*anyopaque) callconv(.C) cpCollisionID;
+pub const cpSpatialIndexSegmentQueryFunc = ?*const fn (?*anyopaque, ?*anyopaque, ?*anyopaque) callconv(.C) cpFloat;
 pub const cpSpatialIndexClass = struct_cpSpatialIndexClass;
 pub const struct_cpSpatialIndex = extern struct {
     klass: [*c]cpSpatialIndexClass,
@@ -1387,17 +1387,17 @@ pub const struct_cpSpatialIndex = extern struct {
     dynamicIndex: [*c]cpSpatialIndex,
 };
 pub const cpSpatialIndex = struct_cpSpatialIndex;
-pub const cpSpatialIndexDestroyImpl = ?fn ([*c]cpSpatialIndex) callconv(.C) void;
-pub const cpSpatialIndexCountImpl = ?fn ([*c]cpSpatialIndex) callconv(.C) c_int;
-pub const cpSpatialIndexEachImpl = ?fn ([*c]cpSpatialIndex, cpSpatialIndexIteratorFunc, ?*anyopaque) callconv(.C) void;
-pub const cpSpatialIndexContainsImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) cpBool;
-pub const cpSpatialIndexInsertImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
-pub const cpSpatialIndexRemoveImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
-pub const cpSpatialIndexReindexImpl = ?fn ([*c]cpSpatialIndex) callconv(.C) void;
-pub const cpSpatialIndexReindexObjectImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
-pub const cpSpatialIndexReindexQueryImpl = ?fn ([*c]cpSpatialIndex, cpSpatialIndexQueryFunc, ?*anyopaque) callconv(.C) void;
-pub const cpSpatialIndexQueryImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpBB, cpSpatialIndexQueryFunc, ?*anyopaque) callconv(.C) void;
-pub const cpSpatialIndexSegmentQueryImpl = ?fn ([*c]cpSpatialIndex, ?*anyopaque, cpVect, cpVect, cpFloat, cpSpatialIndexSegmentQueryFunc, ?*anyopaque) callconv(.C) void;
+pub const cpSpatialIndexDestroyImpl = ?*const fn ([*c]cpSpatialIndex) callconv(.C) void;
+pub const cpSpatialIndexCountImpl = ?*const fn ([*c]cpSpatialIndex) callconv(.C) c_int;
+pub const cpSpatialIndexEachImpl = ?*const fn ([*c]cpSpatialIndex, cpSpatialIndexIteratorFunc, ?*anyopaque) callconv(.C) void;
+pub const cpSpatialIndexContainsImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) cpBool;
+pub const cpSpatialIndexInsertImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
+pub const cpSpatialIndexRemoveImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
+pub const cpSpatialIndexReindexImpl = ?*const fn ([*c]cpSpatialIndex) callconv(.C) void;
+pub const cpSpatialIndexReindexObjectImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpHashValue) callconv(.C) void;
+pub const cpSpatialIndexReindexQueryImpl = ?*const fn ([*c]cpSpatialIndex, cpSpatialIndexQueryFunc, ?*anyopaque) callconv(.C) void;
+pub const cpSpatialIndexQueryImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpBB, cpSpatialIndexQueryFunc, ?*anyopaque) callconv(.C) void;
+pub const cpSpatialIndexSegmentQueryImpl = ?*const fn ([*c]cpSpatialIndex, ?*anyopaque, cpVect, cpVect, cpFloat, cpSpatialIndexSegmentQueryFunc, ?*anyopaque) callconv(.C) void;
 pub const struct_cpSpatialIndexClass = extern struct {
     destroy: cpSpatialIndexDestroyImpl,
     count: cpSpatialIndexCountImpl,
@@ -1423,7 +1423,7 @@ pub extern fn cpBBTreeAlloc() ?*cpBBTree;
 pub extern fn cpBBTreeInit(tree: ?*cpBBTree, bbfunc: cpSpatialIndexBBFunc, staticIndex: [*c]cpSpatialIndex) [*c]cpSpatialIndex;
 pub extern fn cpBBTreeNew(bbfunc: cpSpatialIndexBBFunc, staticIndex: [*c]cpSpatialIndex) [*c]cpSpatialIndex;
 pub extern fn cpBBTreeOptimize(index: [*c]cpSpatialIndex) void;
-pub const cpBBTreeVelocityFunc = ?fn (?*anyopaque) callconv(.C) cpVect;
+pub const cpBBTreeVelocityFunc = ?*const fn (?*anyopaque) callconv(.C) cpVect;
 pub extern fn cpBBTreeSetVelocityFunc(index: [*c]cpSpatialIndex, func: cpBBTreeVelocityFunc) void;
 pub const struct_cpSweep1D = opaque {};
 pub const cpSweep1D = struct_cpSweep1D;
@@ -1535,8 +1535,8 @@ pub const CP_BODY_TYPE_KINEMATIC: c_int = 1;
 pub const CP_BODY_TYPE_STATIC: c_int = 2;
 pub const enum_cpBodyType = c_uint;
 pub const cpBodyType = enum_cpBodyType;
-pub const cpBodyVelocityFunc = ?fn (?*cpBody, cpVect, cpFloat, cpFloat) callconv(.C) void;
-pub const cpBodyPositionFunc = ?fn (?*cpBody, cpFloat) callconv(.C) void;
+pub const cpBodyVelocityFunc = ?*const fn (?*cpBody, cpVect, cpFloat, cpFloat) callconv(.C) void;
+pub const cpBodyPositionFunc = ?*const fn (?*cpBody, cpFloat) callconv(.C) void;
 pub extern fn cpBodyAlloc() ?*cpBody;
 pub extern fn cpBodyInit(body: ?*cpBody, mass: cpFloat, moment: cpFloat) ?*cpBody;
 pub extern fn cpBodyNew(mass: cpFloat, moment: cpFloat) ?*cpBody;
@@ -1586,11 +1586,11 @@ pub extern fn cpBodyApplyImpulseAtLocalPoint(body: ?*cpBody, impulse: cpVect, po
 pub extern fn cpBodyGetVelocityAtWorldPoint(body: ?*const cpBody, point: cpVect) cpVect;
 pub extern fn cpBodyGetVelocityAtLocalPoint(body: ?*const cpBody, point: cpVect) cpVect;
 pub extern fn cpBodyKineticEnergy(body: ?*const cpBody) cpFloat;
-pub const cpBodyShapeIteratorFunc = ?fn (?*cpBody, ?*cpShape, ?*anyopaque) callconv(.C) void;
+pub const cpBodyShapeIteratorFunc = ?*const fn (?*cpBody, ?*cpShape, ?*anyopaque) callconv(.C) void;
 pub extern fn cpBodyEachShape(body: ?*cpBody, func: cpBodyShapeIteratorFunc, data: ?*anyopaque) void;
-pub const cpBodyConstraintIteratorFunc = ?fn (?*cpBody, ?*cpConstraint, ?*anyopaque) callconv(.C) void;
+pub const cpBodyConstraintIteratorFunc = ?*const fn (?*cpBody, ?*cpConstraint, ?*anyopaque) callconv(.C) void;
 pub extern fn cpBodyEachConstraint(body: ?*cpBody, func: cpBodyConstraintIteratorFunc, data: ?*anyopaque) void;
-pub const cpBodyArbiterIteratorFunc = ?fn (?*cpBody, ?*cpArbiter, ?*anyopaque) callconv(.C) void;
+pub const cpBodyArbiterIteratorFunc = ?*const fn (?*cpBody, ?*cpArbiter, ?*anyopaque) callconv(.C) void;
 pub extern fn cpBodyEachArbiter(body: ?*cpBody, func: cpBodyArbiterIteratorFunc, data: ?*anyopaque) void;
 pub const struct_cpPointQueryInfo = extern struct {
     shape: ?*const cpShape,
@@ -1690,8 +1690,8 @@ pub extern fn cpBoxShapeNew2(body: ?*cpBody, box: cpBB, radius: cpFloat) ?*cpSha
 pub extern fn cpPolyShapeGetCount(shape: ?*const cpShape) c_int;
 pub extern fn cpPolyShapeGetVert(shape: ?*const cpShape, index: c_int) cpVect;
 pub extern fn cpPolyShapeGetRadius(shape: ?*const cpShape) cpFloat;
-pub const cpConstraintPreSolveFunc = ?fn (?*cpConstraint, ?*cpSpace) callconv(.C) void;
-pub const cpConstraintPostSolveFunc = ?fn (?*cpConstraint, ?*cpSpace) callconv(.C) void;
+pub const cpConstraintPreSolveFunc = ?*const fn (?*cpConstraint, ?*cpSpace) callconv(.C) void;
+pub const cpConstraintPostSolveFunc = ?*const fn (?*cpConstraint, ?*cpSpace) callconv(.C) void;
 pub extern fn cpConstraintDestroy(constraint: ?*cpConstraint) void;
 pub extern fn cpConstraintFree(constraint: ?*cpConstraint) void;
 pub extern fn cpConstraintGetSpace(constraint: ?*const cpConstraint) ?*cpSpace;
@@ -1754,7 +1754,7 @@ pub extern fn cpGrooveJointSetGrooveB(constraint: ?*cpConstraint, grooveB: cpVec
 pub extern fn cpGrooveJointGetAnchorB(constraint: ?*const cpConstraint) cpVect;
 pub extern fn cpGrooveJointSetAnchorB(constraint: ?*cpConstraint, anchorB: cpVect) void;
 pub extern fn cpConstraintIsDampedSpring(constraint: ?*const cpConstraint) cpBool;
-pub const cpDampedSpringForceFunc = ?fn (?*cpConstraint, cpFloat) callconv(.C) cpFloat;
+pub const cpDampedSpringForceFunc = ?*const fn (?*cpConstraint, cpFloat) callconv(.C) cpFloat;
 pub extern fn cpDampedSpringAlloc() ?*cpDampedSpring;
 pub extern fn cpDampedSpringInit(joint: ?*cpDampedSpring, a: ?*cpBody, b: ?*cpBody, anchorA: cpVect, anchorB: cpVect, restLength: cpFloat, stiffness: cpFloat, damping: cpFloat) ?*cpDampedSpring;
 pub extern fn cpDampedSpringNew(a: ?*cpBody, b: ?*cpBody, anchorA: cpVect, anchorB: cpVect, restLength: cpFloat, stiffness: cpFloat, damping: cpFloat) ?*cpConstraint;
@@ -1771,7 +1771,7 @@ pub extern fn cpDampedSpringSetDamping(constraint: ?*cpConstraint, damping: cpFl
 pub extern fn cpDampedSpringGetSpringForceFunc(constraint: ?*const cpConstraint) cpDampedSpringForceFunc;
 pub extern fn cpDampedSpringSetSpringForceFunc(constraint: ?*cpConstraint, springForceFunc: cpDampedSpringForceFunc) void;
 pub extern fn cpConstraintIsDampedRotarySpring(constraint: ?*const cpConstraint) cpBool;
-pub const cpDampedRotarySpringTorqueFunc = ?fn (?*struct_cpConstraint, cpFloat) callconv(.C) cpFloat;
+pub const cpDampedRotarySpringTorqueFunc = ?*const fn (?*struct_cpConstraint, cpFloat) callconv(.C) cpFloat;
 pub extern fn cpDampedRotarySpringAlloc() ?*cpDampedRotarySpring;
 pub extern fn cpDampedRotarySpringInit(joint: ?*cpDampedRotarySpring, a: ?*cpBody, b: ?*cpBody, restAngle: cpFloat, stiffness: cpFloat, damping: cpFloat) ?*cpDampedRotarySpring;
 pub extern fn cpDampedRotarySpringNew(a: ?*cpBody, b: ?*cpBody, restAngle: cpFloat, stiffness: cpFloat, damping: cpFloat) ?*cpConstraint;
@@ -1855,23 +1855,23 @@ pub extern fn cpSpaceRemoveConstraint(space: ?*cpSpace, constraint: ?*cpConstrai
 pub extern fn cpSpaceContainsShape(space: ?*cpSpace, shape: ?*cpShape) cpBool;
 pub extern fn cpSpaceContainsBody(space: ?*cpSpace, body: ?*cpBody) cpBool;
 pub extern fn cpSpaceContainsConstraint(space: ?*cpSpace, constraint: ?*cpConstraint) cpBool;
-pub const cpPostStepFunc = ?fn (?*cpSpace, ?*anyopaque, ?*anyopaque) callconv(.C) void;
+pub const cpPostStepFunc = ?*const fn (?*cpSpace, ?*anyopaque, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceAddPostStepCallback(space: ?*cpSpace, func: cpPostStepFunc, key: ?*anyopaque, data: ?*anyopaque) cpBool;
-pub const cpSpacePointQueryFunc = ?fn (?*cpShape, cpVect, cpFloat, cpVect, ?*anyopaque) callconv(.C) void;
+pub const cpSpacePointQueryFunc = ?*const fn (?*cpShape, cpVect, cpFloat, cpVect, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpacePointQuery(space: ?*cpSpace, point: cpVect, maxDistance: cpFloat, filter: cpShapeFilter, func: cpSpacePointQueryFunc, data: ?*anyopaque) void;
 pub extern fn cpSpacePointQueryNearest(space: ?*cpSpace, point: cpVect, maxDistance: cpFloat, filter: cpShapeFilter, out: [*c]cpPointQueryInfo) ?*cpShape;
-pub const cpSpaceSegmentQueryFunc = ?fn (?*cpShape, cpVect, cpVect, cpFloat, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceSegmentQueryFunc = ?*const fn (?*cpShape, cpVect, cpVect, cpFloat, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceSegmentQuery(space: ?*cpSpace, start: cpVect, end: cpVect, radius: cpFloat, filter: cpShapeFilter, func: cpSpaceSegmentQueryFunc, data: ?*anyopaque) void;
 pub extern fn cpSpaceSegmentQueryFirst(space: ?*cpSpace, start: cpVect, end: cpVect, radius: cpFloat, filter: cpShapeFilter, out: [*c]cpSegmentQueryInfo) ?*cpShape;
-pub const cpSpaceBBQueryFunc = ?fn (?*cpShape, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceBBQueryFunc = ?*const fn (?*cpShape, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceBBQuery(space: ?*cpSpace, bb: cpBB, filter: cpShapeFilter, func: cpSpaceBBQueryFunc, data: ?*anyopaque) void;
-pub const cpSpaceShapeQueryFunc = ?fn (?*cpShape, [*c]cpContactPointSet, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceShapeQueryFunc = ?*const fn (?*cpShape, [*c]cpContactPointSet, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceShapeQuery(space: ?*cpSpace, shape: ?*cpShape, func: cpSpaceShapeQueryFunc, data: ?*anyopaque) cpBool;
-pub const cpSpaceBodyIteratorFunc = ?fn (?*cpBody, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceBodyIteratorFunc = ?*const fn (?*cpBody, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceEachBody(space: ?*cpSpace, func: cpSpaceBodyIteratorFunc, data: ?*anyopaque) void;
-pub const cpSpaceShapeIteratorFunc = ?fn (?*cpShape, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceShapeIteratorFunc = ?*const fn (?*cpShape, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceEachShape(space: ?*cpSpace, func: cpSpaceShapeIteratorFunc, data: ?*anyopaque) void;
-pub const cpSpaceConstraintIteratorFunc = ?fn (?*cpConstraint, ?*anyopaque) callconv(.C) void;
+pub const cpSpaceConstraintIteratorFunc = ?*const fn (?*cpConstraint, ?*anyopaque) callconv(.C) void;
 pub extern fn cpSpaceEachConstraint(space: ?*cpSpace, func: cpSpaceConstraintIteratorFunc, data: ?*anyopaque) void;
 pub extern fn cpSpaceReindexStatic(space: ?*cpSpace) void;
 pub extern fn cpSpaceReindexShape(space: ?*cpSpace, shape: ?*cpShape) void;
@@ -1885,12 +1885,12 @@ pub const struct_cpSpaceDebugColor = extern struct {
     a: f32,
 };
 pub const cpSpaceDebugColor = struct_cpSpaceDebugColor;
-pub const cpSpaceDebugDrawCircleImpl = ?fn (cpVect, cpFloat, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
-pub const cpSpaceDebugDrawSegmentImpl = ?fn (cpVect, cpVect, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
-pub const cpSpaceDebugDrawFatSegmentImpl = ?fn (cpVect, cpVect, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
-pub const cpSpaceDebugDrawPolygonImpl = ?fn (c_int, [*c]const cpVect, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
-pub const cpSpaceDebugDrawDotImpl = ?fn (cpFloat, cpVect, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
-pub const cpSpaceDebugDrawColorForShapeImpl = ?fn (?*cpShape, cpDataPointer) callconv(.C) cpSpaceDebugColor;
+pub const cpSpaceDebugDrawCircleImpl = ?*const fn (cpVect, cpFloat, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
+pub const cpSpaceDebugDrawSegmentImpl = ?*const fn (cpVect, cpVect, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
+pub const cpSpaceDebugDrawFatSegmentImpl = ?*const fn (cpVect, cpVect, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
+pub const cpSpaceDebugDrawPolygonImpl = ?*const fn (c_int, [*c]const cpVect, cpFloat, cpSpaceDebugColor, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
+pub const cpSpaceDebugDrawDotImpl = ?*const fn (cpFloat, cpVect, cpSpaceDebugColor, cpDataPointer) callconv(.C) void;
+pub const cpSpaceDebugDrawColorForShapeImpl = ?*const fn (?*cpShape, cpDataPointer) callconv(.C) cpSpaceDebugColor;
 pub const CP_SPACE_DEBUG_DRAW_SHAPES: c_int = 1;
 pub const CP_SPACE_DEBUG_DRAW_CONSTRAINTS: c_int = 2;
 pub const CP_SPACE_DEBUG_DRAW_COLLISION_POINTS: c_int = 4;

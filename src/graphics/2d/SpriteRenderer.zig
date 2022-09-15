@@ -90,7 +90,6 @@ pub fn renderer(self: *Self) Renderer {
 
 /// generic rendering implementation
 pub fn draw(self: *Self, ctx: *Context, input: Renderer.Input) anyerror!void {
-    _ = ctx;
     if (input.vds == null or input.vds.?.items.len == 0) return;
     self.program.use();
     defer self.program.disuse();
@@ -109,7 +108,7 @@ pub fn draw(self: *Self, ctx: *Context, input: Renderer.Input) anyerror!void {
         ));
 
     // render vertex data one by one
-    var current_material: *Material = undefined;
+    var current_material: *const Material = undefined;
     for (input.vds.?.items) |vd| {
         if (!vd.valid) continue;
         if (vd.count == 0) continue;

@@ -36,14 +36,14 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // load models
     helmet = try Model.fromGLTF(
-        ctx.default_allocator,
+        ctx.allocator,
         "assets/SciFiHelmet/SciFiHelmet.gltf",
         false,
         null,
     );
     color_mr = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &[_]u8{ 255, 255, 255 },
             .rgb,
             1,
@@ -67,7 +67,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_wireframe = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         null,
@@ -78,10 +78,10 @@ fn init(ctx: *zp.Context) anyerror!void {
         Mat4.fromScale(Vec3.set(0.7)).rotate(90, Vec3.up()),
         null,
     );
-    render_data_raster = try render_data_wireframe.clone(ctx.default_allocator);
+    render_data_raster = try render_data_wireframe.clone(ctx.allocator);
     render_data_wireframe.vds.?.items[0].material = &color_mr;
     render_pipeline = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .beforeFn = beforeWireframeRendering,
@@ -139,20 +139,21 @@ fn loop(ctx: *zp.Context) anyerror!void {
     }
 
     while (ctx.pollEvent()) |e| {
-        if (e == .mouse_event and dig.getIO().*.WantCaptureMouse) {
+        if ((e == .mouse_motion or e == .mouse_button_up or
+            e == .mouse_button_down or e == .mouse_wheel) and
+            dig.getIO().*.WantCaptureMouse)
+        {
             _ = dig.processEvent(e);
             continue;
         }
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

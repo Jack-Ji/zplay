@@ -59,12 +59,12 @@ fn init(ctx: *zp.Context) anyerror!void {
     try dig.init(ctx);
 
     // allocate skybox
-    skybox = SkyboxRenderer.init(ctx.default_allocator);
+    skybox = SkyboxRenderer.init(ctx.allocator);
 
     // allocate framebuffer stuff
     const size = ctx.graphics.getDrawableSize();
     fb = try Framebuffer.init(
-        ctx.default_allocator,
+        ctx.allocator,
         size.w,
         size.h,
         .{},
@@ -72,12 +72,12 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // simple renderer
     scene_renderer = SimpleRenderer.init(.{});
-    screen_renderer = try TextureDisplay.init(ctx.default_allocator);
+    screen_renderer = try TextureDisplay.init(ctx.allocator);
 
     // init materials
     skybox_material = Material.init(.{
         .single_cubemap = try Texture.initCubeFromFilePaths(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/skybox/right.jpg",
             "assets/skybox/left.jpg",
             "assets/skybox/top.jpg",
@@ -92,15 +92,15 @@ fn init(ctx: *zp.Context) anyerror!void {
     // init model
     var material = Material.init(.{
         .single_texture = try Texture.init2DFromFilePath(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/wall.jpg",
             false,
             .{},
         ),
     });
     cube = try Model.init(
-        ctx.default_allocator,
-        try Mesh.genCube(ctx.default_allocator, 1, 1, 1),
+        ctx.allocator,
+        try Mesh.genCube(ctx.allocator, 1, 1, 1),
         Mat4.identity(),
         material,
         &.{material.data.single_texture},
@@ -121,7 +121,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         null,
@@ -136,7 +136,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .custom = &screen_transform,
     };
     pipeline = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .fb = fb,
@@ -163,7 +163,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         ).translate(pos);
     }
     _ = try cube.appendVertexDataInstanced(
-        ctx.default_allocator,
+        ctx.allocator,
         &render_data_scene,
         &cube_transforms,
         null,
@@ -223,37 +223,35 @@ fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        .f2 => {
-                            fb.tex.?.saveToFile(
-                                ctx.default_allocator,
-                                "test.png",
-                                .{},
-                            ) catch unreachable;
-                            fb.tex.?.saveToFile(
-                                ctx.default_allocator,
-                                "test.bmp",
-                                .{ .format = .bmp },
-                            ) catch unreachable;
-                            fb.tex.?.saveToFile(
-                                ctx.default_allocator,
-                                "test.tga",
-                                .{ .format = .tga },
-                            ) catch unreachable;
-                            fb.tex.?.saveToFile(
-                                ctx.default_allocator,
-                                "test.jpg",
-                                .{ .format = .jpg },
-                            ) catch unreachable;
-                        },
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    .f2 => {
+                        fb.tex.?.saveToFile(
+                            ctx.allocator,
+                            "test.png",
+                            .{},
+                        ) catch unreachable;
+                        fb.tex.?.saveToFile(
+                            ctx.allocator,
+                            "test.bmp",
+                            .{ .format = .bmp },
+                        ) catch unreachable;
+                        fb.tex.?.saveToFile(
+                            ctx.allocator,
+                            "test.tga",
+                            .{ .format = .tga },
+                        ) catch unreachable;
+                        fb.tex.?.saveToFile(
+                            ctx.allocator,
+                            "test.jpg",
+                            .{ .format = .jpg },
+                        ) catch unreachable;
+                    },
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

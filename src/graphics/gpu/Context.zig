@@ -133,7 +133,7 @@ blend_option: BlendOption = undefined,
 culling_option: CullingOption = undefined,
 
 /// prepare graphics api
-pub fn prepare(g: zp.Game) !void {
+pub fn prepare(comptime g: zp.Game) !void {
     if (sdl.c.SDL_GL_SetAttribute(sdl.c.SDL_GL_CONTEXT_FLAGS, 0) != 0) {
         return sdl.makeError();
     }
@@ -194,7 +194,7 @@ pub fn prepare(g: zp.Game) !void {
 }
 
 /// allocate graphics context
-pub fn init(window: sdl.Window, g: zp.Game) !Self {
+pub fn init(window: sdl.Window, comptime g: zp.Game) !Self {
     const size = window.getSize();
     const gl_ctx = try sdl.gl.createContext(window);
     try sdl.gl.makeCurrent(gl_ctx, window);
@@ -260,7 +260,6 @@ pub fn getDrawableSize(self: Self) struct { w: u32, h: u32 } {
 
 ///  set vsync mode
 pub fn setVsyncMode(self: *Self, on_off: bool) void {
-    _ = self;
     sdl.gl.setSwapInterval(
         if (on_off) .vsync else .immediate,
     ) catch |e| {
@@ -280,7 +279,6 @@ pub fn clear(
     clear_stencil: bool,
     color: ?[4]f32,
 ) void {
-    _ = self;
     var clear_flags: c_uint = 0;
     if (clear_color) {
         clear_flags |= gl.GL_COLOR_BUFFER_BIT;
@@ -313,7 +311,6 @@ pub const Viewport = struct {
     }
 };
 pub fn setViewport(self: *Self, vp: Viewport) void {
-    _ = self;
     gl.viewport(
         @intCast(c_int, vp.x),
         @intCast(c_int, vp.y),
@@ -326,7 +323,6 @@ pub fn setViewport(self: *Self, vp: Viewport) void {
 
 /// toggle capability
 pub fn toggleCapability(self: *Self, cap: Capability, on_off: bool) void {
-    _ = self;
     if (on_off) {
         gl.enable(@enumToInt(cap));
         self.cap_status.put(cap, true);
@@ -365,7 +361,6 @@ pub const DepthOption = struct {
     update_switch: bool = true, // false means depth buffer won't be updated during rendering
 };
 pub fn setDepthOption(self: *Self, option: DepthOption) void {
-    _ = self;
     gl.depthFunc(@enumToInt(option.test_func));
     gl.depthMask(gl.util.boolType(option.update_switch));
     self.depth_option = option;
@@ -383,7 +378,6 @@ pub const StencilOption = struct {
     write_mask: u8 = 0xff, // bitmask that is ANDed with the stencil value about to be written to the buffer.
 };
 pub fn setStencilOption(self: *Self, option: StencilOption) void {
-    _ = self;
     gl.stencilOp(
         @enumToInt(option.action_sfail),
         @enumToInt(option.action_dpfail),
@@ -409,7 +403,6 @@ pub const BlendOption = struct {
     equation: BlendEquation = .add, // blend equation
 };
 pub fn setBlendOption(self: *Self, option: BlendOption) void {
-    _ = self;
     gl.blendFuncSeparate(
         @enumToInt(option.src_rgb),
         @enumToInt(option.dst_rgb),
@@ -433,7 +426,6 @@ pub const CullingOption = struct {
     front: FrontFace = .ccw,
 };
 pub fn setCullingOption(self: *Self, option: CullingOption) void {
-    _ = self;
     gl.cullFace(@enumToInt(option.face));
     gl.frontFace(@enumToInt(option.front));
     self.culling_option = option;

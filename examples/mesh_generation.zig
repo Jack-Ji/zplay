@@ -36,15 +36,15 @@ fn init(ctx: *zp.Context) anyerror!void {
     simple_renderer = SimpleRenderer.init(.{});
 
     // generate meshes
-    meshes = std.ArrayList(Mesh).init(ctx.default_allocator);
-    positions = std.ArrayList(Vec3).init(ctx.default_allocator);
-    try meshes.append(try Mesh.genQuad(ctx.default_allocator, 1, 1));
-    try meshes.append(try Mesh.genCircle(ctx.default_allocator, 0.5, 50));
-    try meshes.append(try Mesh.genCube(ctx.default_allocator, 0.5, 0.7, 2));
-    try meshes.append(try Mesh.genSphere(ctx.default_allocator, 0.7, 36, 18));
-    try meshes.append(try Mesh.genCylinder(ctx.default_allocator, 1, 0.5, 0.5, 2, 36));
-    try meshes.append(try Mesh.genCylinder(ctx.default_allocator, 1, 0.3, 0.3, 1, 3));
-    try meshes.append(try Mesh.genCylinder(ctx.default_allocator, 1, 0.5, 0, 1, 36));
+    meshes = std.ArrayList(Mesh).init(ctx.allocator);
+    positions = std.ArrayList(Vec3).init(ctx.allocator);
+    try meshes.append(try Mesh.genQuad(ctx.allocator, 1, 1));
+    try meshes.append(try Mesh.genCircle(ctx.allocator, 0.5, 50));
+    try meshes.append(try Mesh.genCube(ctx.allocator, 0.5, 0.7, 2));
+    try meshes.append(try Mesh.genSphere(ctx.allocator, 0.7, 36, 18));
+    try meshes.append(try Mesh.genCylinder(ctx.allocator, 1, 0.5, 0.5, 2, 36));
+    try meshes.append(try Mesh.genCylinder(ctx.allocator, 1, 0.3, 0.3, 1, 3));
+    try meshes.append(try Mesh.genCylinder(ctx.allocator, 1, 0.5, 0, 1, 36));
     try positions.append(Vec3.new(-2.0, 1.2, 0));
     try positions.append(Vec3.new(-0.5, 1.2, 0));
     try positions.append(Vec3.new(1.0, 1.2, 0));
@@ -57,7 +57,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     // create picture_material
     default_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &.{ 0, 255, 0 },
             .rgb,
             1,
@@ -67,7 +67,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     picture_material = Material.init(.{
         .single_texture = try Texture.init2DFromFilePath(
-            ctx.default_allocator,
+            ctx.allocator,
             "assets/wall.jpg",
             false,
             .{},
@@ -100,7 +100,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         if (use_texture) &picture_material else &default_material,
@@ -125,15 +125,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

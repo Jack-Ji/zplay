@@ -11,7 +11,7 @@ const Vec3 = alg.Vec3;
 const Mat4 = alg.Mat4;
 const Self = @This();
 
-pub const TriggerFunc = fn (ctx: *Context, custom: ?*anyopaque) void;
+pub const TriggerFunc = *const fn (ctx: *Context, custom: ?*anyopaque) void;
 
 /// render-pass
 pub const RenderPass = struct {

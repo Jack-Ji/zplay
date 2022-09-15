@@ -22,14 +22,13 @@ var sprite_batch: *SpriteBatch = undefined;
 var camera: *Camera = undefined;
 
 fn init(ctx: *zp.Context) anyerror!void {
-    _ = ctx;
     std.log.info("game init", .{});
 
     const size = ctx.graphics.getDrawableSize();
 
     // create sprite sheet
     sprite_sheet = try SpriteSheet.fromPicturesInDir(
-        ctx.default_allocator,
+        ctx.allocator,
         "assets/images",
         size.w,
         size.h,
@@ -37,7 +36,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .{},
     );
     //sprite_sheet = try SpriteSheet.fromSheetFiles(
-    //    ctx.default_allocator,
+    //    ctx.allocator,
     //    "sheet",
     //);
     custom_effect = SpriteRenderer.init(gfx.gpu.ShaderProgram.shader_head ++
@@ -57,40 +56,38 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
     sprite = try sprite_sheet.createSprite("ogre");
     sprite_batch = try SpriteBatch.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &ctx.graphics,
         10,
         1000,
     );
     camera = try Camera.fromViewport(
-        ctx.default_allocator,
+        ctx.allocator,
         ctx.graphics.viewport,
     );
     sprite_batch.render_data.camera = camera.getCamera();
 
     // create renderer
-    tex_display = try TextureDisplay.init(ctx.default_allocator);
+    tex_display = try TextureDisplay.init(ctx.allocator);
 }
 
 fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        .f2 => try sprite_sheet.saveToFiles("sheet"),
-                        .left => camera.move(-10, 0, .{}),
-                        .right => camera.move(10, 0, .{}),
-                        .up => camera.move(0, -10, .{}),
-                        .down => camera.move(0, 10, .{}),
-                        .z => camera.setZoom(std.math.min(2, camera.zoom + 0.1)),
-                        .x => camera.setZoom(std.math.max(0.1, camera.zoom - 0.1)),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    .f2 => try sprite_sheet.saveToFiles("sheet"),
+                    .left => camera.move(-10, 0, .{}),
+                    .right => camera.move(10, 0, .{}),
+                    .up => camera.move(0, -10, .{}),
+                    .down => camera.move(0, 10, .{}),
+                    .z => camera.setZoom(std.math.min(2, camera.zoom + 0.1)),
+                    .x => camera.setZoom(std.math.max(0.1, camera.zoom - 0.1)),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

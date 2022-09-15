@@ -15,10 +15,10 @@ pub const struct_CbtConstraintHandle__ = extern struct {
     unused: c_int,
 };
 pub const CbtConstraintHandle = [*c]struct_CbtConstraintHandle__;
-pub const CbtDrawLine1Callback = ?fn ([*c]const f32, [*c]const f32, [*c]const f32, ?*anyopaque) callconv(.C) void;
-pub const CbtDrawLine2Callback = ?fn ([*c]const f32, [*c]const f32, [*c]const f32, [*c]const f32, ?*anyopaque) callconv(.C) void;
-pub const CbtDrawContactPointCallback = ?fn ([*c]const f32, [*c]const f32, f32, c_int, [*c]const f32, ?*anyopaque) callconv(.C) void;
-pub const CbtReportErrorWarningCallback = ?fn ([*c]const u8, ?*anyopaque) callconv(.C) void;
+pub const CbtDrawLine1Callback = ?*const fn ([*c]const f32, [*c]const f32, [*c]const f32, ?*anyopaque) callconv(.C) void;
+pub const CbtDrawLine2Callback = ?*const fn ([*c]const f32, [*c]const f32, [*c]const f32, [*c]const f32, ?*anyopaque) callconv(.C) void;
+pub const CbtDrawContactPointCallback = ?*const fn ([*c]const f32, [*c]const f32, f32, c_int, [*c]const f32, ?*anyopaque) callconv(.C) void;
+pub const CbtReportErrorWarningCallback = ?*const fn ([*c]const u8, ?*anyopaque) callconv(.C) void;
 pub const struct_CbtDebugDrawCallbacks = extern struct {
     drawLine1: CbtDrawLine1Callback,
     drawLine2: CbtDrawLine2Callback,

@@ -334,7 +334,7 @@ pub const Renderer = struct {
 
     const VTable = struct {
         /// apply lights to renderer
-        applyLightsFn: fn (ptr: *anyopaque, lights: []Light) void,
+        applyLightsFn: *const fn (ptr: *anyopaque, lights: []Light) void,
     };
 
     pub fn init(

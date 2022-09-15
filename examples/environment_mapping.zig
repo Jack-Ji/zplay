@@ -38,7 +38,7 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     // allocate materials
     cubemap = try Texture.initCubeFromFilePaths(
-        ctx.default_allocator,
+        ctx.allocator,
         "assets/skybox/right.jpg",
         "assets/skybox/left.jpg",
         "assets/skybox/top.jpg",
@@ -82,13 +82,13 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
 
     // alloc renderers
-    skybox = SkyboxRenderer.init(ctx.default_allocator);
+    skybox = SkyboxRenderer.init(ctx.allocator);
     reflect_renderer = EnvMappingRenderer.init(.reflect);
     refract_renderer = EnvMappingRenderer.init(.refract);
     current_scene_renderer = reflect_renderer.renderer();
 
     // load model
-    model = try Model.fromGLTF(ctx.default_allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", false, null);
+    model = try Model.fromGLTF(ctx.allocator, "assets/SciFiHelmet/SciFiHelmet.gltf", false, null);
 
     // compose renderer's input
     camera = Camera.fromPositionAndTarget(
@@ -105,7 +105,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         null,
     );
     render_data_scene = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         &skybox_material,
@@ -156,15 +156,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
     while (ctx.pollEvent()) |e| {
         _ = dig.processEvent(e);
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

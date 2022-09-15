@@ -30,12 +30,11 @@ const emitter2 = ParticleSystem.Effect.FireEmitter(
 );
 
 fn init(ctx: *zp.Context) anyerror!void {
-    _ = ctx;
     std.log.info("game init", .{});
 
     rd = std.rand.DefaultPrng.init(@intCast(u64, std.time.timestamp()));
     sheet = try SpriteSheet.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]SpriteSheet.ImageSource{
             .{
                 .name = "particle",
@@ -49,12 +48,12 @@ fn init(ctx: *zp.Context) anyerror!void {
         1,
     );
     sb = try SpriteBatch.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &ctx.graphics,
         1,
         10000,
     );
-    ps = try ParticleSystem.init(ctx.default_allocator);
+    ps = try ParticleSystem.init(ctx.allocator);
     emitter1.sprite = try sheet.createSprite("particle");
     emitter2.sprite = try sheet.createSprite("particle");
     try ps.addEffect(
@@ -85,15 +84,13 @@ fn loop(ctx: *zp.Context) anyerror!void {
 
     while (ctx.pollEvent()) |e| {
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

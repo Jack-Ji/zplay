@@ -2,7 +2,6 @@ const std = @import("std");
 const zp = @import("zplay.zig");
 const GraphicsContext = zp.graphics.gpu.Context;
 const console = zp.graphics.font.console;
-const event = zp.event;
 const audio = zp.audio;
 const sdl = zp.deps.sdl;
 const log = std.log.scoped(.zplay);
@@ -12,7 +11,7 @@ var perf_counter_freq: f64 = undefined;
 /// application context
 pub const Context = struct {
     /// default allocator
-    default_allocator: std.mem.Allocator = undefined,
+    allocator: std.mem.Allocator = undefined,
 
     /// internal window
     window: sdl.Window,
@@ -79,14 +78,9 @@ pub const Context = struct {
     }
 
     /// poll event
-    pub fn pollEvent(self: *Context) ?event.Event {
+    pub fn pollEvent(self: *Context) ?sdl.Event {
         _ = self;
-        while (sdl.pollEvent()) |e| {
-            if (event.Event.init(e)) |ze| {
-                return ze;
-            }
-        }
-        return null;
+        return sdl.pollEvent();
     }
 
     /// toggle resizable
@@ -318,10 +312,10 @@ pub fn run(comptime g: Game) !void {
     });
     var gpa: ?AllocatorType = null;
     if (g.allocator) |a| {
-        ctx.default_allocator = a;
+        ctx.allocator = a;
     } else {
         gpa = AllocatorType{};
-        ctx.default_allocator = gpa.?.allocator();
+        ctx.allocator = gpa.?.allocator();
     }
     defer {
         if (gpa) |*a| {
@@ -354,7 +348,7 @@ pub fn run(comptime g: Game) !void {
     ctx.graphics.setVsyncMode(g.enable_vsync);
 
     // allocate audio engine
-    ctx.audio = try audio.Engine.init(ctx.default_allocator, .{});
+    ctx.audio = try audio.Engine.init(ctx.allocator, .{});
     defer ctx.audio.deinit();
 
     // apply window options, still changable through Context's methods

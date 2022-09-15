@@ -494,7 +494,19 @@ pub const BeginPlotOption = struct {
     y3_label: [*c]const u8 = null,
 };
 pub fn beginPlot(title_id: [:0]const u8, option: BeginPlotOption) bool {
-    return c.ImPlot_BeginPlot(title_id, option.x_label, option.y_label, option.size, option.flags, option.x_flags, option.y_flags, option.y2_flags, option.y3_flags, option.y2_label, option.y3_label);
+    return c.ImPlot_BeginPlot(
+        title_id.ptr,
+        option.x_label,
+        option.y_label,
+        option.size,
+        option.flags,
+        option.x_flags,
+        option.y_flags,
+        option.y2_flags,
+        option.y3_flags,
+        option.y2_label,
+        option.y3_label,
+    );
 }
 
 // Only call EndPlot() if BeginPlot() returns true! Typically called at the end
@@ -660,7 +672,7 @@ pub fn plotLine_PtrPtr(label_id: [:0]const u8, comptime T: type, xs: [*c]const T
         else => unreachable,
     };
     plotFn(
-        label_id,
+        label_id.ptr,
         xs,
         ys,
         @intCast(c_int, count),

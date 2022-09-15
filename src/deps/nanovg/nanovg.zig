@@ -625,7 +625,7 @@ pub fn stroke() void {
 // Creates font by loading it from the disk from specified file name.
 // Returns handle to the font.
 pub fn createFont(name: [:0]const u8, filename: [:0]const u8) i32 {
-    return c.nvgCreateFont(ctx, name, filename);
+    return c.nvgCreateFont(ctx, name.ptr, filename.ptr);
 }
 
 // fontIndex specifies which font face to load from a .ttf/.ttc file.
@@ -689,7 +689,7 @@ pub fn fontFace(font: [:0]const u8) void {
 // Draws text string at specified location. If end is specified only the sub-string up to the end is drawn.
 pub fn text(x: f32, y: f32, string: []const u8) f32 {
     if (string.len == 0) return x;
-    return c.nvgText(ctx, x, y, std.meta.assumeSentinel(string, 0), string.ptr + string.len);
+    return c.nvgText(ctx, x, y, std.meta.assumeSentinel(string, 0).ptr, string.ptr + string.len);
 }
 
 // Draws multi-line text string at specified location wrapped at the specified width. If end is specified only the sub-string up to the end is drawn.

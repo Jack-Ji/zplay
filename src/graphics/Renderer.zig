@@ -105,10 +105,10 @@ pub const Input = struct {
     vds: ?std.ArrayList(VertexData) = null,
 
     /// camera
-    camera: ?*Camera = null,
+    camera: ?*const Camera = null,
 
     /// globally shared material data
-    material: ?*Material = null,
+    material: ?*const Material = null,
 
     /// renderer's custom data, if any
     custom: ?*const anyopaque = null,
@@ -197,12 +197,12 @@ pub const Input = struct {
 
 const VTable = struct {
     /// generic drawing
-    drawFn: fn (ptr: *anyopaque, ctx: *Context, input: Input) anyerror!void,
+    drawFn: *const fn (ptr: *anyopaque, ctx: *Context, input: Input) anyerror!void,
 };
 
 pub fn init(
     pointer: anytype,
-    comptime drawFn: fn (ptr: @TypeOf(pointer), ctx: *Context, input: Input) anyerror!void,
+    comptime drawFn: *const fn (ptr: @TypeOf(pointer), ctx: *Context, input: Input) anyerror!void,
 ) Renderer {
     const Ptr = @TypeOf(pointer);
     const ptr_info = @typeInfo(Ptr);

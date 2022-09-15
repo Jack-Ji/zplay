@@ -55,8 +55,8 @@ fn init(ctx: *zp.Context) anyerror!void {
 
     try dig.init(ctx);
 
-    cube = try Mesh.genCube(ctx.default_allocator, 1, 1, 1);
-    cube_wire_va = VertexArray.init(ctx.default_allocator, 1);
+    cube = try Mesh.genCube(ctx.allocator, 1, 1, 1);
+    cube_wire_va = VertexArray.init(ctx.allocator, 1);
     cube_wire_va.use();
     cube_wire_va.vbos[0].allocInitData(
         f32,
@@ -65,14 +65,14 @@ fn init(ctx: *zp.Context) anyerror!void {
     );
     cube_wire_va.setAttribute(0, 0, 3, f32, false, 0, 0);
     cube_wire_va.disuse();
-    plane_va = VertexArray.init(ctx.default_allocator, 1);
+    plane_va = VertexArray.init(ctx.allocator, 1);
     plane_va.vbos[0].allocData(@sizeOf(@TypeOf(plane_vs)), .dynamic_draw);
     plane_va.use();
     plane_va.setAttribute(0, 0, 3, f32, false, 0, 0);
     plane_va.disuse();
     cube_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &[_]u8{ 200, 200, 200, 128 },
             .rgba,
             1,
@@ -82,7 +82,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     wire_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &[_]u8{ 0, 0, 0 },
             .rgb,
             1,
@@ -92,7 +92,7 @@ fn init(ctx: *zp.Context) anyerror!void {
     });
     plane_material = Material.init(.{
         .single_texture = try Texture.init2DFromPixels(
-            ctx.default_allocator,
+            ctx.allocator,
             &[_]u8{ 200, 0, 0, 100 },
             .rgba,
             1,
@@ -115,7 +115,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         Vec3.forward(),
     );
     render_data_cube = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         null,
@@ -137,7 +137,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .material = &wire_material,
     });
     render_data_section = try Renderer.Input.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &.{},
         &camera,
         null,
@@ -156,7 +156,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         .pos_range1_max = Vec3.set(1),
     });
     pipeline = try RenderPipeline.init(
-        ctx.default_allocator,
+        ctx.allocator,
         &[_]RenderPipeline.RenderPass{
             .{
                 .beforeFn = beforeRenderingCube,
@@ -185,71 +185,74 @@ fn loop(ctx: *zp.Context) anyerror!void {
     };
 
     while (ctx.pollEvent()) |e| {
-        if (e == .mouse_event and dig.getIO().*.WantCaptureMouse) {
+        if ((e == .mouse_motion or e == .mouse_button_up or
+            e == .mouse_button_down or e == .mouse_wheel) and
+            dig.getIO().*.WantCaptureMouse)
+        {
             _ = dig.processEvent(e);
             continue;
         }
         switch (e) {
-            .keyboard_event => |key| {
-                if (key.trigger_type == .up) {
-                    switch (key.scan_code) {
-                        .escape => ctx.kill(),
-                        else => {},
-                    }
+            .key_up => |key| {
+                switch (key.scancode) {
+                    .escape => ctx.kill(),
+                    else => {},
                 }
             },
-            .mouse_event => |me| {
-                switch (me.data) {
-                    .button => |click| {
-                        if (click.btn != .left) {
-                            continue;
-                        }
-                        if (click.clicked and !S.mouse_btn_pressed) {
-                            S.camera_orig_pos = camera.position;
-                            S.mouse_orig_x = click.x;
-                            S.mouse_orig_y = click.y;
-                        }
-                        S.mouse_btn_pressed = click.clicked;
-                    },
-                    .motion => |move| {
-                        if (!S.mouse_btn_pressed) continue;
-                        const vpos = S.camera_orig_pos.sub(cube_center);
-                        const offset_angle_h = @intToFloat(f32, -(move.x - S.mouse_orig_x)) / 10;
-                        const offset_angle_v = @intToFloat(f32, move.y - S.mouse_orig_y) / 10;
-                        const angle_h = if (vpos.x() > 0)
-                            alg.toDegrees(math.atan(vpos.y() / vpos.x()))
-                        else
-                            180 + alg.toDegrees(math.atan(vpos.y() / vpos.x()));
-                        const angle_v = 90 - vpos.getAngle(Vec3.forward());
-                        const new_angle_h = alg.toRadians(angle_h + offset_angle_h);
-                        const new_angle_v = alg.toRadians(angle_v + offset_angle_v);
-                        const new_pos = cube_center.add(
-                            Vec3.new(
-                                @cos(new_angle_v) * @cos(new_angle_h),
-                                @cos(new_angle_v) * @sin(new_angle_h),
-                                @sin(new_angle_v),
-                            ).scale(vpos.length()),
-                        );
-                        var new_camera = Camera.fromPositionAndTarget(
-                            camera.frustrum,
-                            new_pos,
-                            cube_center,
-                            Vec3.new(0, 0, 1),
-                        );
-                        camera = new_camera;
-                    },
-                    .wheel => |scroll| {
-                        camera.frustrum.perspective.fov -= @intToFloat(f32, scroll.scroll_y);
-                        if (camera.frustrum.perspective.fov < 1) {
-                            camera.frustrum.perspective.fov = 1;
-                        }
-                        if (camera.frustrum.perspective.fov > 45) {
-                            camera.frustrum.perspective.fov = 45;
-                        }
-                    },
+            .mouse_button_down => |click| {
+                if (click.button != .left) {
+                    continue;
+                }
+                if (!S.mouse_btn_pressed) {
+                    S.camera_orig_pos = camera.position;
+                    S.mouse_orig_x = click.x;
+                    S.mouse_orig_y = click.y;
+                }
+                S.mouse_btn_pressed = true;
+            },
+            .mouse_button_up => |click| {
+                if (click.button != .left) {
+                    continue;
+                }
+                S.mouse_btn_pressed = false;
+            },
+            .mouse_motion => |move| {
+                if (!S.mouse_btn_pressed) continue;
+                const vpos = S.camera_orig_pos.sub(cube_center);
+                const offset_angle_h = @intToFloat(f32, -(move.x - S.mouse_orig_x)) / 10;
+                const offset_angle_v = @intToFloat(f32, move.y - S.mouse_orig_y) / 10;
+                const angle_h = if (vpos.x() > 0)
+                    alg.toDegrees(math.atan(vpos.y() / vpos.x()))
+                else
+                    180 + alg.toDegrees(math.atan(vpos.y() / vpos.x()));
+                const angle_v = 90 - vpos.getAngle(Vec3.forward());
+                const new_angle_h = alg.toRadians(angle_h + offset_angle_h);
+                const new_angle_v = alg.toRadians(angle_v + offset_angle_v);
+                const new_pos = cube_center.add(
+                    Vec3.new(
+                        @cos(new_angle_v) * @cos(new_angle_h),
+                        @cos(new_angle_v) * @sin(new_angle_h),
+                        @sin(new_angle_v),
+                    ).scale(vpos.length()),
+                );
+                var new_camera = Camera.fromPositionAndTarget(
+                    camera.frustrum,
+                    new_pos,
+                    cube_center,
+                    Vec3.new(0, 0, 1),
+                );
+                camera = new_camera;
+            },
+            .mouse_wheel => |scroll| {
+                camera.frustrum.perspective.fov -= @intToFloat(f32, scroll.delta_y);
+                if (camera.frustrum.perspective.fov < 1) {
+                    camera.frustrum.perspective.fov = 1;
+                }
+                if (camera.frustrum.perspective.fov > 45) {
+                    camera.frustrum.perspective.fov = 45;
                 }
             },
-            .quit_event => ctx.kill(),
+            .quit => ctx.kill(),
             else => {},
         }
     }

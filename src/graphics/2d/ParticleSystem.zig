@@ -84,7 +84,7 @@ pub fn addEffect(
 
 /// represent a particle effect
 pub const Effect = struct {
-    pub const ParticleEmitFn = fn (
+    pub const ParticleEmitFn = *const fn (
         random: std.rand.Random,
         origin: Vec2,
     ) Particle;

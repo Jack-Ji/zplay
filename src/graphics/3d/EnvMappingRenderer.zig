@@ -133,14 +133,14 @@ pub fn draw(self: *Self, ctx: *Context, input: Renderer.Input) anyerror!void {
     prog.setUniformByName("u_view_pos", input.camera.?.position);
 
     // render vertex data one by one
-    var current_material: *Material = undefined;
+    var current_material: *const Material = undefined;
     for (input.vds.?.items) |vd| {
         if (!vd.valid) continue;
         vd.vertex_array.use();
         defer vd.vertex_array.disuse();
 
         // apply material
-        var mr: *Material = input.material orelse vd.material.?;
+        var mr: *const Material = input.material orelse vd.material.?;
         if (mr != current_material) {
             current_material = mr;
             _ = current_material.allocTextureUnit(0);
