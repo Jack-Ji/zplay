@@ -17,7 +17,7 @@ pub fn link(
     lib.setBuildMode(exe.build_mode);
     lib.setTarget(exe.target);
     lib.linkLibC();
-    lib.addIncludeDir(root_path ++ "/src/deps/chipmunk/c/include");
+    lib.addIncludePath(root_path ++ "/src/deps/chipmunk/c/include");
     lib.addCSourceFiles(&.{
         root_path ++ "/src/deps/chipmunk/c/src/chipmunk.c",
         root_path ++ "/src/deps/chipmunk/c/src/cpArbiter.c",

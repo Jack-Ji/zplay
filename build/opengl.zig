@@ -20,7 +20,7 @@ pub fn link(
     } else if (exe.target.isLinux()) {
         lib.linkSystemLibrary("GL");
     }
-    lib.addIncludeDir(root_path ++ "/src/deps/gl/c/include");
+    lib.addIncludePath(root_path ++ "/src/deps/gl/c/include");
     lib.addCSourceFile(
         root_path ++ "/src/deps/gl/c/src/glad.c",
         flags.items,

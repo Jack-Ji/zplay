@@ -26,8 +26,8 @@ pub fn link(
         lib.linkSystemLibrary("imm32");
         lib.linkSystemLibrary("gdi32");
     }
-    lib.addIncludeDir(root_path ++ "/src/deps/gl/c/include");
-    lib.addIncludeDir(root_path ++ "/src/deps/imgui/c");
+    lib.addIncludePath(root_path ++ "/src/deps/gl/c/include");
+    lib.addIncludePath(root_path ++ "/src/deps/imgui/c");
     lib.addCSourceFiles(&.{
         root_path ++ "/src/deps/imgui/c/imgui.cpp",
         root_path ++ "/src/deps/imgui/c/imgui_demo.cpp",

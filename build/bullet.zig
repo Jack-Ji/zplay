@@ -14,7 +14,7 @@ pub fn link(
     lib.setTarget(exe.target);
     lib.linkLibC();
     lib.linkLibCpp();
-    lib.addIncludeDir(root_path ++ "/src/deps/bullet/c");
+    lib.addIncludePath(root_path ++ "/src/deps/bullet/c");
     lib.addCSourceFiles(&.{
         root_path ++ "/src/deps/bullet/c/cbullet.cpp",
         root_path ++ "/src/deps/bullet/c/btLinearMathAll.cpp",

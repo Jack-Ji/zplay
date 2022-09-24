@@ -12,7 +12,7 @@ pub fn link(
     lib.setBuildMode(exe.build_mode);
     lib.setTarget(exe.target);
     lib.linkLibC();
-    lib.addIncludeDir(root_path ++ "/src/deps/gltf/c");
+    lib.addIncludePath(root_path ++ "/src/deps/gltf/c");
     lib.addCSourceFile(
         root_path ++ "/src/deps/gltf/c/cgltf_wrapper.c",
         flags.items,

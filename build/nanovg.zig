@@ -19,8 +19,8 @@ pub fn link(
     lib.setBuildMode(exe.build_mode);
     lib.setTarget(exe.target);
     lib.linkLibC();
-    lib.addIncludeDir(root_path ++ "/src/deps/gl/c/include");
-    lib.addIncludeDir(root_path ++ "/src/deps/nanovg/c");
+    lib.addIncludePath(root_path ++ "/src/deps/gl/c/include");
+    lib.addIncludePath(root_path ++ "/src/deps/nanovg/c");
     lib.addCSourceFiles(&.{
         root_path ++ "/src/deps/nanovg/c/nanovg.c",
         root_path ++ "/src/deps/nanovg/c/nanovg_gl3_impl.c",

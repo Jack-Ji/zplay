@@ -26,7 +26,7 @@ pub fn link(
         lib.linkSystemLibrary("glib-2.0");
         lib.linkSystemLibrary("gobject-2.0");
     }
-    lib.addIncludeDir(root_path ++ "/src/deps/nfd/c/include");
+    lib.addIncludePath(root_path ++ "/src/deps/nfd/c/include");
     lib.addCSourceFile(
         root_path ++ "/src/deps/nfd/c/nfd_common.c",
         flags.items,
