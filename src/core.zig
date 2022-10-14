@@ -301,10 +301,10 @@ pub fn run(comptime g: Game) !void {
         flags.borderless = true;
     }
     if (g.enable_minimized) {
-        flags.minimized = true;
+        flags.dim = .minimized;
     }
     if (g.enable_maximized) {
-        flags.maximized = true;
+        flags.dim = .maximized;
     }
     var ctx: Context = .{
         .window = try sdl.createWindow(
