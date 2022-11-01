@@ -103,7 +103,7 @@ fn init(ctx: *zp.Context) anyerror!void {
         try Mesh.genCube(ctx.allocator, 1, 1, 1),
         Mat4.identity(),
         material,
-        &.{material.data.single_texture},
+        &[_]*Texture{material.data.single_texture},
     );
 
     // init render scene
