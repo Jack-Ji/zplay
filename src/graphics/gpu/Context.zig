@@ -398,7 +398,7 @@ pub const BlendOption = struct {
     src_rgb: BlendFactor = .src_alpha, // blend factors for rgb
     dst_rgb: BlendFactor = .one_minus_src_alpha,
     src_alpha: BlendFactor = .one, // blend factors for alpha
-    dst_alpha: BlendFactor = .zero,
+    dst_alpha: BlendFactor = .one,
     constant_color: [4]f32 = [4]f32{ 0, 0, 0, 0 }, // constant blend color
     equation: BlendEquation = .add, // blend equation
 };

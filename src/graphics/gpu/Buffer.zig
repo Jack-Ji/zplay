@@ -117,7 +117,7 @@ pub fn updateData(self: Self, offset: u32, comptime T: type, data: []const T) vo
         @enumToInt(Target.array_buffer),
         @intCast(c_longlong, offset),
         @intCast(c_longlong, data.len * @sizeOf(T)),
-        data.ptr,
+        if (data.len == 0) null else data.ptr,
     );
     gl.util.checkError();
 }

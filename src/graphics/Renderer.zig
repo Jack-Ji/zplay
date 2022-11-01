@@ -99,6 +99,56 @@ pub const InstanceTransformArray = struct {
     }
 };
 
+/// vbo specially managed for instanced texture mapping
+pub const InstanceTextureCoordsArray = struct {
+    const Self = @This();
+
+    allocator: std.mem.Allocator,
+
+    /// vbo for instance transform matrices
+    buf: *Buffer,
+
+    /// number of instances
+    count: u32,
+
+    pub fn init(allocator: std.mem.Allocator) !*Self {
+        var self = try allocator.create(Self);
+        self.allocator = allocator;
+        self.buf = Buffer.init(allocator);
+        self.count = 0;
+        return self;
+    }
+
+    pub fn deinit(self: *Self) void {
+        self.buf.deinit();
+        self.allocator.destroy(self);
+    }
+
+    /// upload texture coords
+    pub fn updateTexcoords(self: *Self, coords: [][2]f32) !void {
+        var total_size: u32 = @intCast(u32, @sizeOf([2]f32) * coords.len);
+        if (self.buf.size < total_size) {
+            self.buf.allocData(total_size, .dynamic_draw);
+        }
+        self.buf.updateData(0, [2]f32, coords);
+        self.count = @intCast(u32, coords.len);
+    }
+
+    /// enable vertex attributes
+    /// NOTE: VertexArray should have been activated!
+    pub fn enableAttributes(self: Self, location: c_uint) void {
+        self.buf.setAttribute(
+            location,
+            2,
+            f32,
+            false,
+            @sizeOf([2]f32),
+            0,
+            1,
+        );
+    }
+};
+
 /// generic renderer's input
 pub const Input = struct {
     /// array of vertex data, waiting to be rendered
@@ -140,6 +190,9 @@ pub const Input = struct {
         transform: LocalTransform = .{
             .single = Mat4.identity(),
         },
+
+        /// texture coord(s)
+        texcoords: ?*InstanceTextureCoordsArray = null,
     };
 
     /// allocate renderer's input container

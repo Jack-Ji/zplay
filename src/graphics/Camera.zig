@@ -42,6 +42,9 @@ world_up: Vec3 = undefined,
 /// position of camera
 position: Vec3 = undefined,
 
+/// target of camera
+target: ?Vec3 = null,
+
 /// direction of camera
 dir: Vec3 = undefined,
 
@@ -65,6 +68,7 @@ pub fn fromPositionAndTarget(frustrum: ViewFrustrum, pos: Vec3, target: Vec3, wo
     camera.frustrum = frustrum;
     camera.world_up = world_up orelse Vec3.up();
     camera.position = pos;
+    camera.target = target;
     camera.dir = target.sub(pos).norm();
     camera.right = camera.dir.cross(camera.world_up).norm();
     camera.up = camera.right.cross(camera.dir).norm();
