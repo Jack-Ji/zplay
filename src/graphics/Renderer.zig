@@ -269,7 +269,7 @@ pub fn init(
         fn drawImpl(ptr: *anyopaque, ctx: *Context, input: Input) anyerror!void {
             const self = @ptrCast(Ptr, @alignCast(alignment, ptr));
             return @call(
-                .{ .modifier = .always_inline },
+                .always_inline,
                 drawFn,
                 .{ self, ctx, input },
             );
